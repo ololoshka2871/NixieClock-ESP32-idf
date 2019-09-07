@@ -4,7 +4,6 @@ cmake_minimum_required(VERSION 3.5)
 
 set(IDF_TARGET esp32)
 
-
 # Todo trimm list
 set(COMPONENTS
     #app_trace
@@ -78,5 +77,6 @@ set(COMPONENTS
 
 include($ENV{IDF_PATH}/tools/cmake/project.cmake)
 project(NixieClock-ESP32-idf)
+
 
 #add_subdirectory(src)

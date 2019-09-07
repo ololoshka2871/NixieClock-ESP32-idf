@@ -1,4 +1,5 @@
 *build/
-#sdkconfig
+sdkconfig
 sdkconfig.old
+CMakeLists.txt.*
 
