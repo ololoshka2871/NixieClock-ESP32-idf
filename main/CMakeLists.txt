@@ -1,5 +1,8 @@
 set(sources
     main.cpp
+    Nixie.cpp
+    RTC.cpp
+    String_format.cpp
 )
 
 idf_component_register(SRCS ${sources}
