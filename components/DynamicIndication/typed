@@ -1,0 +1,18 @@
+#ifndef _TYPE_ID_H_
+#define _TYPE_ID_H_
+
+#include <cstdint>
+
+// https://stackoverflow.com/a/31334843
+
+template <unsigned int Y> struct typed {
+  typedef typename typed<(Y & (Y - 1)) == 0 ? Y / 2 : (Y &(Y - 1))>::type type;
+};
+
+template <> struct typed<0> { typedef std::uint8_t type; };
+
+template <> struct typed<256> { typedef std::uint16_t type; };
+
+template <> struct typed<65536> { typedef std::uint32_t type; };
+
+#endif //_TYPE_ID_H_
