@@ -10,6 +10,8 @@ namespace Effects {
 template <typename T> struct IEffect {
   virtual ~IEffect() = default;
 
+  virtual void SetAnimationDuration(size_t FullAnimationFrameCount) = 0;
+
   virtual void nextFrame() = 0;
 
   virtual void setDestinationData(const std::vector<T> &destination) = 0;

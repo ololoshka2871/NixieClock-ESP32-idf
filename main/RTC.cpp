@@ -348,6 +348,5 @@ RTCManager &RTCManager::begin() {
 RTCManager &
 RTCManager::setCallback(const RTCManager::onTimeUpdated &onTimeUpdated) {
   cb = onTimeUpdated;
-  // cb(format("%06d", 138));
   return *this;
 }

@@ -36,6 +36,10 @@ template <typename Tout> struct ic74141Encoder {
     return result;
   }
 
+  const std::string::value_type getunknownCharValue() const {
+    return unknown_char_value;
+  };
+
 private:
   Encode_map_t encodemap;
   const std::string::value_type unknown_char_value;

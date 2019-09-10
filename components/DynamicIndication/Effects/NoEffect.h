@@ -10,6 +10,7 @@ namespace DynamicIndication {
 namespace Effects {
 
 template <typename T> struct NoEffect : public IEffect<T> {
+  void SetAnimationDuration(size_t FullAnimationFrameCount) override {}
   void nextFrame() override {}
 
   void setDestinationData(const std::vector<T> &destination) override {
