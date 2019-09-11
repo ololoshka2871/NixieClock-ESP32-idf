@@ -70,12 +70,13 @@ DynamicIndication::Controller di_controller(datapolicy, selector, encoder,
                                             &fade_effector);
 
 void Nixie::configure() {
-  fade_effector.setPulseWeigth(1.0f);
+  fade_effector.setPulseWeigth(1.0f).SetAnimationDuration(
+      ANIMATION_FRAME_COUNT);
   di_controller
-      .setUpdateInterval(MICROSECONDS_IN_SECOND / FPS / SelectorBus.width())
+      .setUpdateInterval(MICROSECONDS_IN_SECOND / FPS / SelectorBus.width() - 1)
       .setText("000000")
       .setEnabled();
-  di_controller.getEffector().SetAnimationDuration(ANIMATION_FRAME_COUNT);
+  di_controller.getEffector();
 }
 
 void Nixie::setValue(const std::string &v) { di_controller.setText(v); }

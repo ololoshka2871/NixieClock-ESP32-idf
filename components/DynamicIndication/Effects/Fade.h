@@ -75,10 +75,7 @@ template <typename T> struct Fade : public IEffect<T> {
         // не показывать
         selected_buf = &animated_diff;
       }
-      if (++frame_counter == halfAnimationDuration) {
-        IntergalhowedLight = 0;
-        IntegralDestLight = 0;
-      }
+      ++frame_counter;
     } else if (frame_counter < FullAnimationFrameCount) {
       IntegralDestLight +=
           F(halfAnimationDuration, FullAnimationFrameCount - frame_counter);

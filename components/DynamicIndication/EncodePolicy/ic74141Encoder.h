@@ -23,8 +23,8 @@ template <typename Tout> struct ic74141Encoder {
   ic74141Encoder(const ic74141Encoder &) = default;
   ic74141Encoder(ic74141Encoder &&) = default;
 
-  std::vector<Tout> encode(const std::string &input) {
-    std::vector<Tout> result(input.size());
+  const std::vector<Tout> &encode(const std::string &input) {
+    result.resize(input.size());
 
     auto src_it = input.cbegin();
     auto dest_it = result.begin();
@@ -43,6 +43,7 @@ template <typename Tout> struct ic74141Encoder {
 private:
   Encode_map_t encodemap;
   const std::string::value_type unknown_char_value;
+  std::vector<Tout> result;
 
   Output_t encode_symbol(const std::string::value_type symbol) {
     auto it = encodemap.find(symbol);
