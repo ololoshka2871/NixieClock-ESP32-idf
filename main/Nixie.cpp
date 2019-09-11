@@ -11,7 +11,7 @@
 
 static constexpr uint32_t MICROSECONDS_IN_SECOND = 1000 * 1000;
 static constexpr uint32_t FPS = 500;
-static constexpr uint32_t ANIMATION_FRAME_COUNT = 2 * FPS / 3;
+static constexpr uint32_t ANIMATION_FRAME_COUNT = FPS / 2;
 
 using encoder_type = DynamicIndication::EncodePolicy::ic74141Encoder<uint8_t>;
 using effector_type =
@@ -70,6 +70,7 @@ DynamicIndication::Controller di_controller(datapolicy, selector, encoder,
                                             &fade_effector);
 
 void Nixie::configure() {
+  fade_effector.setPulseWeigth(1.0f);
   di_controller
       .setUpdateInterval(MICROSECONDS_IN_SECOND / FPS / SelectorBus.width())
       .setText("000000")

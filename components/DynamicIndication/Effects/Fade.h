@@ -23,6 +23,8 @@ namespace Effects {
 static constexpr char *TAG = "MyModule";
 
 template <typename T> struct Fade : public IEffect<T> {
+  using this_type = Fade<T>;
+
   /// Используем следующее уравнение для опрределения яркости в точке анимации
   /// @ref halfAnimationDuration = FullAnimationFrameCount / 2
   /// Для убывающей части: F1(frame_counter) = halfAnimationDuration -
@@ -44,57 +46,54 @@ template <typename T> struct Fade : public IEffect<T> {
   ///
   /// Для второй половины просто меняем функцию и пределы интегрирования
 
-  Fade(const T spaceChar) : spaceChar(spaceChar) {}
+  Fade(const T spaceChar) : PulseWeigth(1.0f), spaceChar(spaceChar) {}
 
-  // первообразная участка спадания яркости
-  static constexpr float DFdown(float C, size_t frame_number) {
-    float x = frame_number + 1;
-    return C * x - x * x / 2.0f;
-  }
-
-  // первообразная участка нарастния яркости
-  static constexpr float DFup(float C, size_t frame_number) {
-    float x = frame_number + 1;
-    return x * x / 2.0f - C * x;
+  /**
+   * @brief Функция яркости символа от номера кадра анимации
+   * @param C Длина анимации
+   * @param frame_number номер кадра
+   * @return яркость в пределах [0..C]
+   */
+  static constexpr size_t F(size_t C, size_t frame_number) {
+    return C - frame_number;
   }
 
   void SetAnimationDuration(size_t FullAnimationFrameCount) override {
+    this->FullAnimationFrameCount = FullAnimationFrameCount;
     halfAnimationDuration = FullAnimationFrameCount / 2;
-    halfAnimationIntegralLight =
-        DFdown(halfAnimationDuration, halfAnimationDuration) -
-        DFdown(halfAnimationDuration, 0);
   }
 
   void nextFrame() override {
     if (frame_counter < halfAnimationDuration) {
       // убывание яркости
-      auto destIntegralLighting = DFdown(halfAnimationDuration, frame_counter) -
-                                  DFdown(halfAnimationDuration, 0);
-      if (IntergalhowedLight < destIntegralLighting) {
+      IntegralDestLight += F(halfAnimationDuration, frame_counter);
+      if (IntergalhowedLight < IntegralDestLight) {
         // показать символы
         selected_buf = &animation_src;
-        IntergalhowedLight += halfAnimationDuration;
+        IntergalhowedLight += halfAnimationDuration * PulseWeigth;
       } else {
         // не показывать
         selected_buf = &animated_diff;
       }
-    } else if (frame_counter < halfAnimationDuration * 2) {
-      auto destIntegralLighting =
-          DFup(halfAnimationDuration, frame_counter) -
-          DFup(halfAnimationDuration, halfAnimationDuration) +
-          halfAnimationIntegralLight;
-      if (IntergalhowedLight < destIntegralLighting) {
+      if (++frame_counter == halfAnimationDuration) {
+        IntergalhowedLight = 0;
+        IntegralDestLight = 0;
+      }
+    } else if (frame_counter < FullAnimationFrameCount) {
+      IntegralDestLight +=
+          F(halfAnimationDuration, FullAnimationFrameCount - frame_counter);
+      if (IntergalhowedLight < IntegralDestLight) {
         // показать символы
         selected_buf = &animation_dest;
-        IntergalhowedLight += halfAnimationDuration;
+        IntergalhowedLight += halfAnimationDuration * PulseWeigth;
       } else {
         // не показывать
         selected_buf = &animated_diff;
       }
+      ++frame_counter;
     } else {
       selected_buf = &animation_dest;
     }
-    ++frame_counter;
   }
 
   void setDestinationData(const std::vector<T> &destination) override {
@@ -120,6 +119,11 @@ template <typename T> struct Fade : public IEffect<T> {
 
   const std::vector<T> &frame() const override { return *selected_buf; }
 
+  this_type &setPulseWeigth(float weigth) {
+    PulseWeigth = weigth;
+    return *this;
+  }
+
 private:
   std::vector<T> animation_src;
   std::vector<T> animated_diff;
@@ -127,9 +131,13 @@ private:
 
   std::vector<T> *selected_buf;
 
+  size_t FullAnimationFrameCount;
   size_t halfAnimationDuration;
-  float halfAnimationIntegralLight;
-  size_t IntergalhowedLight;
+
+  float PulseWeigth;
+
+  float IntergalhowedLight;
+  size_t IntegralDestLight;
 
   const T spaceChar;
 
@@ -150,6 +158,7 @@ private:
     selected_buf = &animation_src;
     frame_counter = 0;
     IntergalhowedLight = 0;
+    IntegralDestLight = 0;
   }
 };
 
