@@ -4,6 +4,8 @@
 #include <memory>
 #include <vector>
 
+#include "esp_log.h"
+
 #include "../typed"
 
 namespace DynamicIndication {
@@ -12,6 +14,7 @@ namespace DataPolicy {
 template <typename T> struct ic7414ParralelPolicy {
   using bus_type = T;
   using data_type = typename bus_type::data_type;
+  static constexpr char *TAG = "ic7414ParralelPolicy";
 
   static constexpr uint32_t bits_pre_channel = 4;
 
@@ -27,6 +30,13 @@ template <typename T> struct ic7414ParralelPolicy {
   void setData(const std::vector<data_type> &dataSrc, uint8_t group) {
     uint32_t bus_val = 0;
     for (uint ch = 0; ch < channels_pre_data_bus; ++ch) {
+      if (dataSrc.size() <= group + ch * group_count) {
+        ESP_LOGW(TAG,
+                 "dataSrc.size()[%d] <= group[%d] + "
+                 "ch[%d] * group_count[%d]",
+                 dataSrc.size(), group, ch, group_count);
+        return;
+      }
       auto d = dataSrc.at(group + ch * group_count);
       bus_val |= d << (bits_pre_channel * ch);
     }

@@ -2,6 +2,7 @@
 #define IEFFECT_H
 
 #include <cstdint>
+#include <functional>
 #include <vector>
 
 namespace DynamicIndication {
@@ -20,7 +21,8 @@ template <typename T> struct IEffect {
 
   virtual void initBuffers(size_t fbsize) = 0;
 
-  virtual const std::vector<T> &frame() const = 0;
+  virtual void
+  frameOp(const std::function<void(const std::vector<T> &)> &op) const = 0;
 };
 
 } // namespace Effects

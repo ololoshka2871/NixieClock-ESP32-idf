@@ -125,7 +125,10 @@ private:
   }
 
   void NextGroup() {
-    datapolicy.setData(effector->frame(), selectorPolicy.next_element());
+    effector->frameOp([this](auto frame) {
+      datapolicy.setData(frame, selectorPolicy.next_element());
+    });
+
     if (selectorPolicy.isFirstElement()) {
       effector->nextFrame();
     }

@@ -10,7 +10,7 @@
 #define ENABLE_PINS 1
 
 static constexpr uint32_t MICROSECONDS_IN_SECOND = 1000 * 1000;
-static constexpr uint32_t FPS = 500;
+static constexpr uint32_t FPS = 400;
 static constexpr uint32_t ANIMATION_FRAME_COUNT = FPS / 2;
 
 using encoder_type = DynamicIndication::EncodePolicy::ic74141Encoder<uint8_t>;

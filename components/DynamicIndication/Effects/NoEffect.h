@@ -2,6 +2,7 @@
 #define NO_EFFECT_H
 
 #include <algorithm>
+#include <mutex>
 #include <vector>
 
 #include "IEffect.h"
@@ -14,6 +15,7 @@ template <typename T> struct NoEffect : public IEffect<T> {
   void nextFrame() override {}
 
   void setDestinationData(const std::vector<T> &destination) override {
+    std::lock_guard gv(mutex);
     std::copy(destination.cbegin(), destination.cend(), data.begin());
     if (destination.size() < data.size()) {
       auto it = data.end();
@@ -24,6 +26,8 @@ template <typename T> struct NoEffect : public IEffect<T> {
 
   void setDestinationData(std::vector<T> &&destination) override {
     auto src_size = destination.size();
+
+    std::lock_guard gv(mutex);
     data = std::move(destination);
     if (src_size < data.size()) {
       auto it = data.end();
@@ -34,10 +38,15 @@ template <typename T> struct NoEffect : public IEffect<T> {
 
   void initBuffers(size_t fbsize) override { data.resize(fbsize); }
 
-  std::vector<T> &frame() const override { return data; }
+  void frameOp(
+      const std::function<void(const std::vector<T> &)> &op) const override {
+    std::lock_guard gv(mutex);
+    op(data);
+  }
 
 private:
   std::vector<T> data;
+  mutable std::mutex mutex;
 };
 
 } // namespace Effects

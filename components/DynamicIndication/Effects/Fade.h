@@ -5,22 +5,13 @@
 #include <atomic>
 #include <cmath>
 #include <limits>
+#include <mutex>
 #include <vector>
 
 #include "IEffect.h"
 
-#define LOG_LOCAL_LEVEL ESP_LOG_VERBOSE
-#include "esp_log.h"
-
-#define GRADATIONS_FROM_FRAME_COUNT(fc)                                        \
-  (fc) / 24 // +1 dradation pre 24 animation frames
-
-#define MINIMAL_ANIMATION_GRADATIONS_COUNT 3u
-
 namespace DynamicIndication {
 namespace Effects {
-
-static constexpr char *TAG = "MyModule";
 
 template <typename T> struct Fade : public IEffect<T> {
   using this_type = Fade<T>;
@@ -94,17 +85,23 @@ template <typename T> struct Fade : public IEffect<T> {
   }
 
   void setDestinationData(const std::vector<T> &destination) override {
-    animation_src = std::move(animation_dest);
-    animation_dest = destination;
-    generate_animated_diff();
+    {
+      std::lock_guard gv(mutex);
+      animation_src = std::move(animation_dest);
+      animation_dest = destination;
+      generate_animated_diff();
+    }
 
     reset_animation();
   }
 
   void setDestinationData(std::vector<T> &&destination) override {
-    animation_src = std::move(animation_dest);
-    animation_dest = std::move(destination);
-    generate_animated_diff();
+    {
+      std::lock_guard gv(mutex);
+      animation_src = std::move(animation_dest);
+      animation_dest = std::move(destination);
+      generate_animated_diff();
+    }
 
     reset_animation();
   }
@@ -114,7 +111,11 @@ template <typename T> struct Fade : public IEffect<T> {
     animation_dest.resize(fbsize);
   }
 
-  const std::vector<T> &frame() const override { return *selected_buf; }
+  void frameOp(
+      const std::function<void(const std::vector<T> &)> &op) const override {
+    std::lock_guard gv(mutex);
+    op(*selected_buf);
+  }
 
   this_type &setPulseWeigth(float weigth) {
     PulseWeigth = weigth;
@@ -139,6 +140,8 @@ private:
   const T spaceChar;
 
   std::atomic<size_t> frame_counter;
+
+  mutable std::mutex mutex;
 
   void generate_animated_diff() {
     auto animation_dest_size = animation_dest.size();
