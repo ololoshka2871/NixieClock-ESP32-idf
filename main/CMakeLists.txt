@@ -6,9 +6,20 @@ set(sources
 )
 
 idf_component_register(SRCS ${sources}
-                    INCLUDE_DIRS ".")
+                    INCLUDE_DIRS "."
+                    REQUIRES
+                        DynamicIndication
+                        ds1307
+                        ds18x20
+                        FastLED
+)
 
 component_compile_options(-std=c++17)
+
+target_compile_definitions(${COMPONENT_LIB}
+    PRIVATE
+        #-DTEST_MODE
+)
 
 ########################################################################################################################
 

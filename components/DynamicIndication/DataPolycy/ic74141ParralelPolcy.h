@@ -14,7 +14,7 @@ namespace DataPolicy {
 template <typename T> struct ic7414ParralelPolicy {
   using bus_type = T;
   using data_type = typename bus_type::data_type;
-  static constexpr char *TAG = "ic7414ParralelPolicy";
+  static constexpr char TAG[] = "ic7414ParralelPolicy";
 
   static constexpr uint32_t bits_pre_channel = 4;
 

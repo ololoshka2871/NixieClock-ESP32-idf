@@ -16,16 +16,16 @@ set(COMPONENTS
 #    bt
 #    coap
 #    console
-    cxx
+     cxx
 #    driver
 #    efuse
 #    esp-tls
-    esp32
+     esp32
 #    esp_adc_cal
 #    esp_common
 #    esp_eth
 #    esp_event
-    esp_gdbstub
+     esp_gdbstub
 #    esp_http_client
 #    esp_http_server
 #    esp_https_ota
@@ -35,11 +35,11 @@ set(COMPONENTS
 #    esp_rom
 #    esp_websocket_client
 #    esp_wifi espcoredump
-    esptool_py
+     esptool_py
 #    expat
 #    fatfs
 #    freemodbus
-    freertos
+     freertos
 #    heap
 #    idf_test
 #    jsmn
@@ -73,14 +73,8 @@ set(COMPONENTS
 #    wpa_supplicant
 #    xtensa
 
-     DynamicIndication
-     ds1307
-
      main
 )
 
 include($ENV{IDF_PATH}/tools/cmake/project.cmake)
 project(NixieClock-ESP32-idf)
-
-
-#add_subdirectory(src)

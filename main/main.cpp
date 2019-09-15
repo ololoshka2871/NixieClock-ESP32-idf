@@ -7,8 +7,13 @@
 
 #include "Nixie.h"
 #include "RTC.h"
+#include "TemperatureSensor.h"
+
+#include "FastLED.h"
 
 static RTCManager rtc_ctrl;
+static TemperatureSensor ds18b20{GPIO_NUM_4, std::chrono::seconds(10)};
+CRGB leds[6];
 
 static constexpr char LOG_TAG[] = "app_main";
 
@@ -33,8 +38,25 @@ extern "C" void app_main(void) {
   Nixie::configure();
 
   rtc_ctrl
-      .setupRTC()
-      //.loadTime()
+#ifndef TEST_MODE
+      //.setupRTC()
+      .loadTime()
+#endif
       .setCallback(std::bind(Nixie::setValue, std::placeholders::_1))
       .begin();
+
+  ds18b20.begin();
+
+  FastLED.addLeds<NEOPIXEL,
+#ifdef TEST_MODE
+                  GPIO_NUM_4
+#else
+                  GPIO_NUM_15
+#endif
+                  >(leds, 6);
+
+  for (auto &led : leds) {
+    led = CRGB::Red;
+  }
+  FastLED.show();
 }

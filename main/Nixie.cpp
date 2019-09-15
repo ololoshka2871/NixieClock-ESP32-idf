@@ -7,7 +7,7 @@
 
 #include "Nixie.h"
 
-#define ENABLE_PINS 1
+#define FORCE_ENABLE_PINS 0
 
 static constexpr uint32_t MICROSECONDS_IN_SECOND = 1000 * 1000;
 static constexpr uint32_t FPS = 400;
@@ -18,7 +18,7 @@ using effector_type =
     DynamicIndication::Effects::Fade<typename encoder_type::Output_t>;
 
 static DynamicIndication::Output::ParalelOutputBus<8> DataBus {
-#if ENABLE_PINS
+#if !defined(TEST_MODE) || FORCE_ENABLE_PINS
   GPIO_NUM_27,     // D1A
       GPIO_NUM_26, // D2A
       GPIO_NUM_25, // D3A
@@ -34,7 +34,7 @@ static DynamicIndication::Output::ParalelOutputBus<8> DataBus {
 };
 
 static DynamicIndication::Output::ParalelOutputBus<3> SelectorBus {
-#if ENABLE_PINS
+#if !defined(TEST_MODE) || FORCE_ENABLE_PINS
   GPIO_NUM_13,     // TG0
       GPIO_NUM_2,  // TG1
       GPIO_NUM_14, // TG2

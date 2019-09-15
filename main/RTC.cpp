@@ -1,5 +1,4 @@
 #include <ctime>
-#include <thread>
 
 #include <driver/gpio.h>
 #include <esp_log.h>
@@ -9,25 +8,27 @@
 
 #include "RTC.h"
 
-static constexpr gpio_num_t RTC_seccond_irq_pin = GPIO_NUM_23;
-static constexpr uint32_t Sync_Clock_EVERY_s = 60;
-
+static constexpr gpio_num_t SQW_PIN = GPIO_NUM_23;
 static constexpr gpio_num_t SDA_PIN = GPIO_NUM_21;
 static constexpr gpio_num_t SCL_PIN = GPIO_NUM_22;
 
+static constexpr uint32_t Sync_Clock_EVERY_s = 60;
+
 void RTCManager::register_rtc_interrupt() {
-  gpio_pad_select_gpio(RTC_seccond_irq_pin);
-  gpio_set_direction(RTC_seccond_irq_pin, GPIO_MODE_INPUT);
-  gpio_set_pull_mode(RTC_seccond_irq_pin, GPIO_FLOATING);
-  gpio_set_intr_type(RTC_seccond_irq_pin, GPIO_INTR_NEGEDGE);
-  gpio_intr_enable(RTC_seccond_irq_pin);
+#ifndef TEST_MODE
+  gpio_pad_select_gpio(SQW_PIN);
+  gpio_set_direction(SQW_PIN, GPIO_MODE_INPUT);
+  gpio_set_pull_mode(SQW_PIN, GPIO_FLOATING);
+  gpio_set_intr_type(SQW_PIN, GPIO_INTR_NEGEDGE);
+  gpio_intr_enable(SQW_PIN);
 
   gpio_isr_handler_add(
-      RTC_seccond_irq_pin,
+      SQW_PIN,
       [](void *ctx) {
         xSemaphoreGiveFromISR(static_cast<SemaphoreHandle_t>(ctx), nullptr);
       },
       rtc_sem);
+#endif
 }
 
 void RTCManager::load_clock() {
