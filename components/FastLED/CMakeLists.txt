@@ -49,7 +49,6 @@ idf_component_register(SRCS ${FastLED_src}
 
 target_compile_definitions(${COMPONENT_LIB}
     PUBLIC
-        -DFASTLED_ALLOW_INTERRUPTS=1
         -DFASTLED_USE_PROGMEM=0
         -DFASTLED_HAS_CLOCKLESS
         -DFASTLED_RMT_BUILTIN_DRIVER=1
