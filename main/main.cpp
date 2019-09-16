@@ -10,10 +10,12 @@
 #include "TemperatureSensor.h"
 
 #include "FastLED.h"
+#include "MHZ19.h"
 
 static RTCManager rtc_ctrl;
 static TemperatureSensor ds18b20{GPIO_NUM_4, std::chrono::seconds(10)};
-CRGB leds[6];
+static CRGB leds[6];
+static MHZ19 mhz_19{UART_NUM_2, GPIO_NUM_16, GPIO_NUM_17};
 
 static constexpr char LOG_TAG[] = "app_main";
 
@@ -47,6 +49,9 @@ extern "C" void app_main(void) {
 
   ds18b20.begin();
 
+  // turn off GPIO logging
+  esp_log_level_set("gpio", ESP_LOG_NONE);
+
   FastLED.addLeds<NEOPIXEL,
 #ifdef TEST_MODE
                   GPIO_NUM_4
@@ -59,4 +64,7 @@ extern "C" void app_main(void) {
     led = CRGB::Red;
   }
   FastLED.show();
+
+  ESP_LOGI("MHZ-19", "CO2 = %d [ppm], T = %d [*C]", mhz_19.getPPM(),
+           mhz_19.getTemperature());
 }

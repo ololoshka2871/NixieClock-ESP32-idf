@@ -45,9 +45,20 @@ private:
   std::atomic<bool> exitflag;
 
   static void thread_func(TemperatureSensor *self) {
+    float T;
     while (true) {
       if (self->exitflag)
         return;
+
+      auto err =
+          ds18x20_measure_and_read(self->OneWirePin, self->sensorAddress, &T);
+      if (err == ESP_OK) {
+        ESP_LOGI(LOG_TAG, "Temperatire: %f *C", T);
+        self->sensed_temperature = T;
+      } else {
+        ESP_LOGE(LOG_TAG, "Failed to read temperature from ds18x20, code: %d",
+                 err);
+      }
 
       std::this_thread::sleep_for(self->temperature_update_interval);
     }

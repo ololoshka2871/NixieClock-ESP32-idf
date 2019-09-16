@@ -8,10 +8,13 @@ set(sources
 idf_component_register(SRCS ${sources}
                     INCLUDE_DIRS "."
                     REQUIRES
+                        log
+
                         DynamicIndication
                         ds1307
                         ds18x20
                         FastLED
+                        MHZ_19
 )
 
 component_compile_options(-std=c++17)

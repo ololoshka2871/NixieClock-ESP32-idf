@@ -58,5 +58,5 @@ target_compile_definitions(${COMPONENT_LIB}
 
 target_compile_options(${COMPONENT_LIB}
     PUBLIC
-        -Wno-class-memaccess
+        $<$<COMPILE_LANGUAGE:CXX>:-Wno-class-memaccess -Wno-register>
 )
