@@ -27,6 +27,7 @@ struct RTCManager {
   RTCManager &setupRTC(const std::time_t &dest_time = 0);
   RTCManager &begin();
   RTCManager &setCallback(const onTimeUpdated &onTimeUpdated);
+  RTCManager &enable(bool enable = true);
 
 public:
   void enable_1s_interrupt();

@@ -74,7 +74,7 @@ void Nixie::configure() {
       ANIMATION_FRAME_COUNT);
   di_controller
       .setUpdateInterval(MICROSECONDS_IN_SECOND / FPS / SelectorBus.width() - 1)
-      .setText("000000")
+      .setText("      ")
       .setEnabled();
   di_controller.getEffector();
 }

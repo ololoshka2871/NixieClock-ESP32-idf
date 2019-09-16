@@ -14,6 +14,11 @@ static constexpr gpio_num_t SCL_PIN = GPIO_NUM_22;
 
 static constexpr uint32_t Sync_Clock_EVERY_s = 60;
 
+static constexpr tm build_time{
+    CLOCK_START_SEC,     CLOCK_START_MIN,
+    CLOCK_START_HOUR,    CLOCK_START_DAY,
+    CLOCK_START_MON - 1, CLOCK_START_YEAR - RTCManager::tm_fix_value};
+
 void RTCManager::register_rtc_interrupt() {
 #ifndef TEST_MODE
   gpio_pad_select_gpio(SQW_PIN);
@@ -32,6 +37,7 @@ void RTCManager::register_rtc_interrupt() {
 }
 
 void RTCManager::load_clock() {
+  tm build_time_copy{build_time};
   tm time{};
 
   if (ds1307_get_time(&ds1307_dev, &time) != ESP_OK) {
@@ -40,15 +46,25 @@ void RTCManager::load_clock() {
   }
   fix_tm(time);
 
-  const struct timeval tv { std::mktime(&time), 0 };
-  settimeofday(&tv, nullptr);
-
-  ESP_LOGI(LOG_TAG, "RTC Clock syncronised: %s", std::asctime(&time));
+  time_t ds1307_time = std::mktime(&time);
+  time_t _build_time = std::mktime(&build_time_copy);
+  if (ds1307_time < _build_time) {
+    const struct timeval tv { _build_time, 0 };
+    settimeofday(&tv, nullptr);
+    ESP_LOGI(LOG_TAG, "Setup RTC to build time: %s", std::asctime(&build_time));
+    setupRTC(_build_time);
+  } else {
+    const struct timeval tv { ds1307_time, 0 };
+    settimeofday(&tv, nullptr);
+    ESP_LOGI(LOG_TAG, "RTC Clock syncronised: %s", std::asctime(&time));
+  }
 }
 
 void RTCManager::thread_func(RTCManager *self) {
   self->register_rtc_interrupt();
   self->enable_1s_interrupt();
+  self->enable();
+
   while (true) {
     if (self->exitflag)
       return;
@@ -118,5 +134,10 @@ RTCManager &RTCManager::begin() {
 RTCManager &
 RTCManager::setCallback(const RTCManager::onTimeUpdated &onTimeUpdated) {
   cb = onTimeUpdated;
+  return *this;
+}
+
+RTCManager &RTCManager::enable(bool enable) {
+  ds1307_start(&ds1307_dev, enable);
   return *this;
 }
