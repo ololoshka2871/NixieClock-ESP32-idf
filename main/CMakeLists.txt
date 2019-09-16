@@ -15,6 +15,7 @@ idf_component_register(SRCS ${sources}
                         ds18x20
                         FastLED
                         MHZ_19
+                        VoltageSensors
 )
 
 component_compile_options(-std=c++17)
