@@ -8,10 +8,11 @@ set(dynamic_indication_src
     SelectorPolicy/Selector.h
 )
 
-set(REQUIRES esp32)
-
 idf_component_register(#SRCS ${dynamic_indication_src}
-                       INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR})
+                       INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}
+                       REQUIRES
+                        esp32
+)
 
 #target_compile_options(${COMPONENT_LIB}
 #    PRIVATE

@@ -3,12 +3,16 @@ set(sources
     Nixie.cpp
     RTC.cpp
     String_format.cpp
+    HttpServer.cpp
 )
 
 idf_component_register(SRCS ${sources}
                     INCLUDE_DIRS "."
                     REQUIRES
                         log
+                        nvs_flash
+                        mdns
+                        freertos
 
                         DynamicIndication
                         ds1307
@@ -16,6 +20,7 @@ idf_component_register(SRCS ${sources}
                         FastLED
                         MHZ_19
                         VoltageSensors
+                        jsl-esp32
 )
 
 component_compile_options(-std=c++17)
@@ -24,6 +29,13 @@ target_compile_definitions(${COMPONENT_LIB}
     PRIVATE
         #-DTEST_MODE
 )
+
+target_link_libraries(${COMPONENT_LIB} PUBLIC ${LIBC})
+
+#target_compile_options(${COMPONENT_LIB}
+#    PUBLIC
+#        -lstdc++
+#)
 
 ########################################################################################################################
 

@@ -20,7 +20,7 @@ set(COMPONENTS
 #    driver
 #    efuse
 #    esp-tls
-     esp32
+#    esp32
 #    esp_adc_cal
 #    esp_common
 #    esp_eth
@@ -34,12 +34,13 @@ set(COMPONENTS
 #    esp_ringbuf
 #    esp_rom
 #    esp_websocket_client
-#    esp_wifi espcoredump
+#    esp_wifi
+#    espcoredump
      esptool_py
 #    expat
 #    fatfs
 #    freemodbus
-     freertos
+#    freertos
 #    heap
 #    idf_test
 #    jsmn

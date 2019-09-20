@@ -66,8 +66,9 @@ static encoder_type encoder{
 
 static effector_type fade_effector(encoder.getunknownCharValue());
 
-DynamicIndication::Controller di_controller(datapolicy, selector, encoder,
-                                            &fade_effector);
+DynamicIndication::Controller<decltype(datapolicy), decltype(selector),
+                              decltype(encoder), decltype(fade_effector) *>
+    di_controller(datapolicy, selector, encoder, &fade_effector);
 
 void Nixie::configure() {
   fade_effector.setPulseWeigth(1.0f).SetAnimationDuration(

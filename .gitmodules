@@ -4,3 +4,12 @@
 [submodule "components/FastLED/FastLED_dist"]
 	path = components/FastLED/FastLED_dist
 	url = https://github.com/FastLED/FastLED.git
+[submodule "components/jsl-esp32/server"]
+	path = components/jsl-esp32/server
+	url = https://github.com/oxomoxo/jsl-esp32-http.git
+[submodule "components/jsl-esp32/json"]
+	path = components/jsl-esp32/json
+	url = https://github.com/oxomoxo/jsl-esp32-json.git
+[submodule "components/jsl-esp32/utils"]
+	path = components/jsl-esp32/utils
+	url = https://github.com/oxomoxo/jsl-esp32-utils.git

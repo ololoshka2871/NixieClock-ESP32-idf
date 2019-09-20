@@ -1,10 +1,13 @@
 #include <ctime>
+#include <sstream>
+#include <vector>
 
 #include <driver/gpio.h>
 #include <esp_log.h>
 
 #include "i2cdev.h"
 
+#include "HttpServer.h"
 #include "Nixie.h"
 #include "RTC.h"
 #include "TemperatureSensor.h"
@@ -24,6 +27,8 @@ static VSensors voltage_sensors{
 };
 
 static constexpr char LOG_TAG[] = "app_main";
+
+using svect_t = std::vector<std::string>;
 
 extern "C" void app_main(void) {
   gpio_install_isr_service(0); // interrupt for all gpio events
@@ -62,4 +67,7 @@ extern "C" void app_main(void) {
     auto val = voltage_sensors.getChannelVoltage(i);
     ESP_LOGI("Voltage", "Channel %d voltage: %f V", i, val);
   }
+
+  HttpServerConfigure();
+  HttpServerStart();
 }

@@ -17,11 +17,6 @@ set(FastLED_src
     arduino-calls.cpp
 )
 
-set(REQUIRES
-        esp32
-        freertos
-)
-
 set(src_to_patch FastLED.h)
 set(orig_src_to_patch FastLED.h.orig)
 if (EXISTS ${FastLED_base}/${src_to_patch})
@@ -45,6 +40,9 @@ idf_component_register(SRCS ${FastLED_src}
                         ${CMAKE_CURRENT_BINARY_DIR}
                         ${COMPONENT_DIR}/include
                         ${FastLED_base}
+                       REQUIRES
+                        esp32
+                        freertos
 )
 
 target_compile_definitions(${COMPONENT_LIB}

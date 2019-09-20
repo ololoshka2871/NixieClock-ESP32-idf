@@ -18,8 +18,8 @@ struct RTCManager {
   // int tm_year;			/* Year	- 1900.  */
   static constexpr int tm_fix_value = 1900;
 
-  static constexpr void fix_tm(tm &_tm) { _tm.tm_year -= tm_fix_value; }
-  static constexpr void unfix_tm(tm &_tm) { _tm.tm_year += tm_fix_value; }
+  static void fix_tm(tm &_tm) { _tm.tm_year -= tm_fix_value; }
+  static void unfix_tm(tm &_tm) { _tm.tm_year += tm_fix_value; }
 
   RTCManager(uint8_t rtc_addr = DS1307_ADDR);
   ~RTCManager();
