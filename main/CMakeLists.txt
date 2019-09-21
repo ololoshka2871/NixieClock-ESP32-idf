@@ -4,6 +4,8 @@ set(sources
     RTC.cpp
     String_format.cpp
     HttpServer.cpp
+    mDNSServer.cpp
+    NetAdapter.cpp
 )
 
 idf_component_register(SRCS ${sources}

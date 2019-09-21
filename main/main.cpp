@@ -16,6 +16,7 @@
 #include "FastLED.h"
 #include "MHZ19.h"
 
+#ifndef TEST_MODE
 static RTCManager rtc_ctrl;
 static TemperatureSensor ds18b20{GPIO_NUM_4, std::chrono::seconds(10)};
 static CRGB leds[6];
@@ -25,6 +26,7 @@ static VSensors voltage_sensors{
     VSensChanel{ADC1_CHANNEL_7, 9.1f, 1.0f},  // 5 v
     VSensChanel{ADC1_CHANNEL_6, 24.0f, 1.0f}, // 12 v
 };
+#endif
 
 static constexpr char LOG_TAG[] = "app_main";
 
@@ -42,24 +44,25 @@ extern "C" void app_main(void) {
       .begin();
 #endif
 
+#ifndef TEST_MODE
   ds18b20.begin();
+#endif
 
   // turn off GPIO logging
   esp_log_level_set("gpio", ESP_LOG_NONE);
 
-  FastLED.addLeds<NEOPIXEL,
-#ifdef TEST_MODE
-                  GPIO_NUM_4
-#else
-                  GPIO_NUM_15
+#ifndef TEST_MODE
+  FastLED.addLeds<NEOPIXEL, GPIO_NUM_15>(leds, 6);
 #endif
-                  >(leds, 6);
 
+#ifndef TEST_MODE
   for (auto &led : leds) {
     led = CRGB::Red;
   }
   FastLED.show();
+#endif
 
+#ifndef TEST_MODE
   ESP_LOGI("MHZ-19", "CO2 = %d [ppm], T = %d [*C]", mhz_19.getPPM(),
            mhz_19.getTemperature());
 
@@ -67,7 +70,8 @@ extern "C" void app_main(void) {
     auto val = voltage_sensors.getChannelVoltage(i);
     ESP_LOGI("Voltage", "Channel %d voltage: %f V", i, val);
   }
+#endif
 
-  HttpServerConfigure();
-  HttpServerStart();
+  HttpServer::begin();
+  HttpServer::start();
 }
