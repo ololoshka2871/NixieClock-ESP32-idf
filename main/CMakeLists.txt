@@ -3,7 +3,8 @@ set(sources
     Nixie.cpp
     RTC.cpp
     String_format.cpp
-    HttpServer.cpp
+#    HttpServer.cpp
+    VirtuinoJsonServer.cpp
     mDNSServer.cpp
     NetAdapter.cpp
 

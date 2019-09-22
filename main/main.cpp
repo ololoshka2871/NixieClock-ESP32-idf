@@ -7,11 +7,12 @@
 
 #include "i2cdev.h"
 
-#include "HttpServer.h"
+//#include "HttpServer.h"
 #include "Nixie.h"
 #include "RTC.h"
 #include "TemperatureSensor.h"
 #include "VSensors.h"
+#include "VirtuinoJsonServer.h"
 #include "monitor.h"
 
 #include "FastLED.h"
@@ -75,8 +76,13 @@ extern "C" void app_main(void) {
   }
 #endif
 
-#if 1
+#if 0
   HttpServer::begin();
   HttpServer::start();
+#endif
+
+#if 1
+  VirtuinoJsonServer::begin();
+  VirtuinoJsonServer::start();
 #endif
 }

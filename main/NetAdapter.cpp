@@ -26,7 +26,7 @@ NetAdapter &NetAdapter::instance() {
 void NetAdapter::on_wifi_ap_started(void *arg, esp_event_base_t event_base,
                                     int32_t event_id, void *event_data) {
   NetAdapter *_this = static_cast<NetAdapter *>(arg);
-  ip_event_got_ip_t *event = (ip_event_got_ip_t *)event_data;
+  // ip_event_got_ip_t *event = (ip_event_got_ip_t *)event_data;
   xEventGroupSetBits(_this->event_group, AP_STARTED);
 }
 
