@@ -39,7 +39,7 @@ void HttpServer::begin() {
 
 void HttpServer::start() {
   // не через std::thread, чтобы задать размер стека
-  xTaskCreate(&jsl_http::run, "HttpServer", 4096, nullptr, 3, nullptr);
+  xTaskCreate(&jsl_http::run, "HttpServer", 4096, nullptr, 10, nullptr);
 }
 
 void HttpServer::createMdnsRecord() {

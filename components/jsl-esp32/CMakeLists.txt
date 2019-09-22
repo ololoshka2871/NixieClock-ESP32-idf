@@ -7,6 +7,10 @@ file(READ ${jsl_esp32_http_base}/${src_to_patch} jsl_http_cpp)
     string(REPLACE "while(ret == ERR_OK);"
         "while(ret != ERR_MEM && ret != ERR_BUF && ret != ERR_VAL && ret != ERR_IF && ret != ERR_ARG);"
         jsl_http_cpp "${jsl_http_cpp}")
+    string(REPLACE "vTaskDelay(pdMS_TO_TICKS(1))"
+        "vTaskDelay(1)"
+        jsl_http_cpp "${jsl_http_cpp}")
+
 file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/${src_to_patch} "${jsl_http_cpp}")
 
 set(jsl_esp32_http_src

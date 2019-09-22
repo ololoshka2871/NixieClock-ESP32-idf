@@ -6,6 +6,8 @@ set(sources
     HttpServer.cpp
     mDNSServer.cpp
     NetAdapter.cpp
+
+    monitor.cpp
 )
 
 idf_component_register(SRCS ${sources}

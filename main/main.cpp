@@ -12,6 +12,7 @@
 #include "RTC.h"
 #include "TemperatureSensor.h"
 #include "VSensors.h"
+#include "monitor.h"
 
 #include "FastLED.h"
 #include "MHZ19.h"
@@ -35,6 +36,8 @@ using svect_t = std::vector<std::string>;
 extern "C" void app_main(void) {
   gpio_install_isr_service(0); // interrupt for all gpio events
   ESP_ERROR_CHECK(i2cdev_init());
+
+  Monitor::start(5);
 
   Nixie::configure();
 
@@ -72,6 +75,8 @@ extern "C" void app_main(void) {
   }
 #endif
 
+#if 1
   HttpServer::begin();
   HttpServer::start();
+#endif
 }
