@@ -7,6 +7,9 @@ set(sources
     VirtuinoJsonServer.cpp
     mDNSServer.cpp
     NetAdapter.cpp
+    GUI.cpp
+    DefaultEventLoop.cpp
+    InterfaceButton.cpp
 
     monitor.cpp
 )

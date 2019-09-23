@@ -8,6 +8,7 @@
 #include "i2cdev.h"
 
 //#include "HttpServer.h"
+#include "GUI.h"
 #include "Nixie.h"
 #include "RTC.h"
 #include "TemperatureSensor.h"
@@ -81,8 +82,10 @@ extern "C" void app_main(void) {
   HttpServer::start();
 #endif
 
-#if 1
+#if 0
   VirtuinoJsonServer::begin();
   VirtuinoJsonServer::start();
 #endif
+
+  GUI::init();
 }
