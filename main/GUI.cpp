@@ -4,7 +4,19 @@
 
 #include "InterfaceButton.h"
 
+#include "GUIStates/CO2Monitor.h"
+#include "GUIStates/ClockState.h"
+#include "GUIStates/DateDisplayer.h"
+#include "GUIStates/TemperatureMonitor.h"
+#include "GUIStates/WifiEnabler.h"
+
 #include "GUI.h"
+
+static ClockState clockState;
+static CO2Monitor co2Monitor;
+static TemperatureMonitor temperatureMonitor;
+static DateDisplay dateDisplay;
+static WifiEnabler wifiEnabler;
 
 static InterfaceButton btn{GPIO_NUM_0};
 

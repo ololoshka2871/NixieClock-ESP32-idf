@@ -79,6 +79,13 @@ InterfaceButton &InterfaceButton::onLongPush(InterfaceButton::event_cb_t &&cb) {
   return *this;
 }
 
+InterfaceButton &InterfaceButton::resetCallbacks() {
+  for (int i = 0; i < eventID::SIZE; ++i) {
+    callbacks[i] = nullptr;
+  }
+  return *this;
+}
+
 bool InterfaceButton::getButtonState() const { return !!gpio_get_level(pin); }
 
 void InterfaceButton::CheckButton() {

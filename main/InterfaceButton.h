@@ -29,6 +29,7 @@ struct InterfaceButton {
   InterfaceButton &onRelease(event_cb_t &&cb);
   InterfaceButton &onClick(event_cb_t &&cb);
   InterfaceButton &onLongPush(event_cb_t &&cb);
+  InterfaceButton &resetCallbacks();
 
 private:
   static uint registredButtons;
