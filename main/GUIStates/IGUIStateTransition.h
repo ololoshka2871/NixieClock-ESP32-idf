@@ -1,7 +1,7 @@
 #ifndef _IGUI_STATE_TRANSITION_
 #define _IGUI_STATE_TRANSITION_
 
-#include "IGUIState.h"
+struct IGUIState;
 
 struct IGUIStateTransition {
   IGUIState *targetState;

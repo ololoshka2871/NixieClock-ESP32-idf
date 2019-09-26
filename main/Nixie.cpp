@@ -24,7 +24,7 @@ static DynamicIndication::Output::ParalelOutputBus<8> DataBus {
       GPIO_NUM_25, // D3A
       GPIO_NUM_33, // D4A
       GPIO_NUM_32, // D1B
-      GPIO_NUM_5,  // D2B
+      GPIO_NUM_12, // 5 // D2B
       GPIO_NUM_18, // D3B
       GPIO_NUM_19, // D4B
 #else
