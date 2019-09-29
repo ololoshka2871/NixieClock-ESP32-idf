@@ -48,9 +48,6 @@ void TemperatureSensor::thread_func(TemperatureSensor *self) {
 
   float T;
   while (true) {
-    if (self->exitflag)
-      return;
-
     auto err =
         ds18x20_measure_and_read(self->OneWirePin, self->sensorAddress, &T);
     if (err == ESP_OK) {
@@ -68,6 +65,8 @@ void TemperatureSensor::thread_func(TemperatureSensor *self) {
                                self->temperature_update_interval)
                                .count();
          ++i) {
+      if (self->exitflag)
+        return;
       std::this_thread::sleep_for(tick_duration_t(1));
     }
   }

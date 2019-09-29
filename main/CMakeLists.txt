@@ -17,6 +17,7 @@ set(sources
     GUIStates/ClockState.cpp
     GUIStates/CO2Monitor.cpp
     GUIStates/TemperatureMonitor.cpp
+    GUIStates/DateDisplayer.cpp
 
     GUIStates/QuickTransition.cpp
 

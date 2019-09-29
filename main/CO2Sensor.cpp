@@ -33,9 +33,6 @@ void CO2Sensor::thread_func(CO2Sensor *self) {
       std::chrono::duration<int, std::ratio<1, CONFIG_FREERTOS_HZ>>;
 
   while (true) {
-    if (self->exitflag)
-      return;
-
     auto co2_level = self->sensor.getPPM();
 
     ESP_LOGI(LOG_TAG, "CO2 level: %d ppm", co2_level);
@@ -49,6 +46,8 @@ void CO2Sensor::thread_func(CO2Sensor *self) {
          i < std::chrono::duration_cast<tick_duration_t>(self->update_interval)
                  .count();
          ++i) {
+      if (self->exitflag)
+        return;
       std::this_thread::sleep_for(tick_duration_t(1));
     }
   }

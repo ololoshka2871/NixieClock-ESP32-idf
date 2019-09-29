@@ -31,7 +31,7 @@ private:
   std::chrono::seconds prevus_pdate_period;
   bool presistant;
 
-  void updateDisplay(int PPM);
+  void updateDisplay(int CO2Level);
 };
 
 #endif /* _CO2_MONITOR_H_ */

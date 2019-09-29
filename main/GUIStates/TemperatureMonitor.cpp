@@ -1,11 +1,35 @@
 #include <cmath>
 #include <limits>
 
+#include <esp_log.h>
+
+#include "String_format.h"
+
 #include "TemperatureSensor.h"
 
+#include "FastLED.h"
 #include "Nixie.h"
 
 #include "TemperatureMonitor.h"
+
+static CRGB temperture2Color(float T, bool Low) {
+  static constexpr float minimumTemperature = 0.0f;
+  static constexpr float maximumTemperature = 50.0f;
+
+  // k * (maximumTemperature - minimumTemperature) = HUE_RED - HUE_BLUE
+  const float k =
+      (HUE_RED - HUE_BLUE) / (maximumTemperature - minimumTemperature);
+
+  if (T <= minimumTemperature) {
+    return CRGB::Blue;
+  } else if (T >= maximumTemperature) {
+    return CRGB::Red;
+  }
+
+  auto H = HUE_BLUE + (int8_t)std::round(k * T);
+  CRGB res{CHSV(H, Low ? 200 : 255, Low ? 100 : 255)};
+  return res;
+}
 
 TemperatureMonitor::TemperatureMonitor(bool presistant)
     : AbstractGUIState(), presistant(presistant) {}
@@ -37,10 +61,17 @@ void TemperatureMonitor::leave() {
 }
 
 void TemperatureMonitor::updateDisplay(float temperature) {
-  std::string buf(Nixie::clear_indicators);
-  if (!std::isnan(temperature)) {
-    std::snprintf(buf.data(), buf.size() + 1, "% 6d",
-                  (int)std::floor(temperature * 100));
-  }
-  indicators->setValue(buf);
+  indicators->setValue(
+      !std::isnan(temperature)
+          ? format(" % 5d", (int)std::round(std::fabs(temperature * 100)))
+          : Nixie::clear_indicators);
+
+  auto _leds = leds->leds();
+
+  _leds[1] = _leds[0] = temperture2Color(temperature, true);
+  _leds[4] = _leds[3] = _leds[2] = temperture2Color(temperature, false);
+
+  _leds[5] = temperature < 0 ? CRGB::BlueViolet : CRGB::Red;
+
+  leds->show();
 }
