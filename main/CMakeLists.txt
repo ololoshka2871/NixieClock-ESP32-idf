@@ -10,6 +10,15 @@ set(sources
     GUI.cpp
     DefaultEventLoop.cpp
     InterfaceButton.cpp
+    TemperatureSensor.cpp
+    CO2Sensor.cpp
+
+    GUIStates/InitialTransition.cpp
+    GUIStates/ClockState.cpp
+    GUIStates/CO2Monitor.cpp
+    GUIStates/TemperatureMonitor.cpp
+
+    GUIStates/QuickTransition.cpp
 
     monitor.cpp
 )

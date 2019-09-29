@@ -1,5 +1,5 @@
-#ifndef _QUICK_RETURN_TO_CLOCK_
-#define _QUICK_RETURN_TO_CLOCK_
+#ifndef _QUICK_TRANSITION_CLOCK_
+#define _QUICK_TRANSITION_CLOCK_
 
 #include "AbstractGUIStateTransition.h"
 
@@ -9,8 +9,10 @@ struct QuickTransition : public AbstractGUIStateTransition {
 
   const char *getLOG_TAG() const override { return LOG_TAG; }
 
+  void Transit(Nixie *indicators, CFastLED *leds) override;
+
 private:
   static constexpr char LOG_TAG[] = "QuickTransition";
 };
 
-#endif /* _QUICK_RETURN_TO_CLOCK_ */
+#endif /* _QUICK_TRANSITION_CLOCK_ */

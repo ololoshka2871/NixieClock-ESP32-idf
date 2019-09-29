@@ -3,9 +3,17 @@
 
 #include <string>
 
-namespace Nixie {
-void configure();
-void setValue(const std::string &v);
-}; // namespace Nixie
+struct Nixie {
+  inline static const std::string clear_indicators = "      ";
+
+  static Nixie *instance();
+
+  void setValue(const std::string &v);
+
+private:
+  static Nixie *inst;
+
+  Nixie();
+};
 
 #endif /*_NIXIE_H_*/

@@ -4,8 +4,9 @@
 #include "AbstractGUIStateTransition.h"
 
 struct InitialTransition : public AbstractGUIStateTransition {
-  InitialTransition(AbstractGUIState *targetState)
-      : AbstractGUIStateTransition{targetState} {}
+  InitialTransition(AbstractGUIState *targetState);
+
+  void Transit(Nixie *indicators, CFastLED *leds) override;
 
   const char *getLOG_TAG() const { return LOG_TAG; }
 

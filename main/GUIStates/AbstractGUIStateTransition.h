@@ -6,12 +6,14 @@
 #include "GUI.h"
 
 struct AbstractGUIState;
+struct Nixie;
+class CFastLED;
 
 struct AbstractGUIStateTransition {
   AbstractGUIStateTransition(AbstractGUIState *targetState)
       : targetState(targetState) {}
 
-  virtual void Transit() {
+  virtual void Transit(Nixie *indicators, CFastLED *leds) {
     ESP_LOGI(getLOG_TAG(), "Transit()");
     GUI::setCurrentState(targetState);
   }

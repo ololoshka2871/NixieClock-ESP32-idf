@@ -12,7 +12,12 @@
 
 #include "GUIStates/InitialTransition.h"
 #include "GUIStates/ProgressTransition.h"
-#include "GUIStates/QuickReturnToClock.h"
+#include "GUIStates/QuickTransition.h"
+
+#include "FastLED.h"
+
+#include "Nixie.h"
+#include "RTC.h"
 
 #include "GUI.h"
 
@@ -42,9 +47,23 @@ private:
   const std::string msg;
 };
 
-void GUI::init() {
+static void setupSensors(RTCManager *rtc, CO2Sensor *CO2Sensor,
+                         TemperatureSensor *TSensor) {
+  clockState.setRTC(rtc);
+
+  co2Monitor.setSensor(CO2Sensor);
+  co2MonitorPresistant.setSensor(CO2Sensor);
+
+  temperatureMonitor.setSensor(TSensor);
+  temperatureMonitorPresistant.setSensor(TSensor);
+}
+
+void GUI::init(RTCManager *rtc, CO2Sensor *CO2Sensor,
+               TemperatureSensor *TSensor) {
   btn.begin();
   btn.onPush(Logger("Pushed")).onRelease(Logger("Released"));
+
+  setupSensors(rtc, CO2Sensor, TSensor);
 
   auto quickReturnToClock = std::make_shared<QuickTransition>(&clockState);
 
@@ -82,9 +101,9 @@ void GUI::init() {
       std::make_shared<QuickTransition>(&dateDisplay);
 }
 
-void GUI::start() { initialTransition.Transit(); }
+void GUI::start() { initialTransition.Transit(Nixie::instance(), &FastLED); }
 
 void GUI::setCurrentState(AbstractGUIState *newstate) {
   currentState = newstate;
-  currentState->enter(btn);
+  currentState->enter(btn, Nixie::instance(), &FastLED);
 }

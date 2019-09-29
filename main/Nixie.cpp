@@ -66,18 +66,28 @@ static encoder_type encoder{
 
 static effector_type fade_effector(encoder.getunknownCharValue());
 
-DynamicIndication::Controller<decltype(datapolicy), decltype(selector),
-                              decltype(encoder), decltype(fade_effector) *>
+static DynamicIndication::Controller<decltype(datapolicy), decltype(selector),
+                                     decltype(encoder),
+                                     decltype(fade_effector) *>
     di_controller(datapolicy, selector, encoder, &fade_effector);
 
-void Nixie::configure() {
+Nixie *Nixie::inst = nullptr;
+
+Nixie *Nixie::instance() {
+  if (inst == nullptr) {
+    inst = new Nixie();
+  }
+  return inst;
+}
+
+void Nixie::setValue(const std::string &v) { di_controller.setText(v); }
+
+Nixie::Nixie() {
   fade_effector.setPulseWeigth(1.0f).SetAnimationDuration(
       ANIMATION_FRAME_COUNT);
   di_controller
       .setUpdateInterval(MICROSECONDS_IN_SECOND / FPS / SelectorBus.width() - 1)
-      .setText("      ")
+      .setText(clear_indicators)
       .setEnabled();
   di_controller.getEffector();
 }
-
-void Nixie::setValue(const std::string &v) { di_controller.setText(v); }

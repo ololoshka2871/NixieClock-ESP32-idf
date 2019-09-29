@@ -3,12 +3,16 @@
 
 #include "InterfaceButton.h"
 
-class AbstractGUIState;
+struct AbstractGUIState;
+struct RTCManager;
+struct CO2Sensor;
+struct TemperatureSensor;
 
 struct GUI {
   static constexpr char LOG_TAG[] = "GUI";
 
-  static void init();
+  static void init(RTCManager *rtc, CO2Sensor *CO2Sensor,
+                   TemperatureSensor *TSensor);
   static void start();
 
   static void setCurrentState(AbstractGUIState *newstate);

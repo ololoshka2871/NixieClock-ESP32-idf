@@ -8,6 +8,7 @@
 #include "i2cdev.h"
 
 //#include "HttpServer.h"
+#include "CO2Sensor.h"
 #include "GUI.h"
 #include "Nixie.h"
 #include "RTC.h"
@@ -17,13 +18,12 @@
 #include "monitor.h"
 
 #include "FastLED.h"
-#include "MHZ19.h"
 
 #ifndef TEST_MODE
 static RTCManager rtc_ctrl;
-static TemperatureSensor ds18b20{GPIO_NUM_4, std::chrono::seconds(10)};
+static TemperatureSensor ds18b20{GPIO_NUM_4, std::chrono::minutes(1)};
 static CRGB leds[6];
-static MHZ19 mhz_19{UART_NUM_2, GPIO_NUM_16, GPIO_NUM_17};
+static CO2Sensor mhz_19{UART_NUM_2, GPIO_NUM_16, GPIO_NUM_17};
 static VSensors voltage_sensors{
     VSensChanel{ADC1_CHANNEL_3, 4.7f, 1.0f},  // 3.3v
     VSensChanel{ADC1_CHANNEL_7, 9.1f, 1.0f},  // 5 v
@@ -43,16 +43,13 @@ extern "C" void app_main(void) {
   Monitor::start(5);
 #endif
 
-  Nixie::configure();
-
 #ifndef TEST_MODE
-  rtc_ctrl.loadTime();
-  rtc_ctrl.setCallback(std::bind(Nixie::setValue, std::placeholders::_1))
-      .begin();
+  rtc_ctrl.loadTime().begin();
 #endif
 
 #ifndef TEST_MODE
   ds18b20.begin();
+  mhz_19.begin();
 #endif
 
   // turn off GPIO logging
@@ -63,15 +60,10 @@ extern "C" void app_main(void) {
 #endif
 
 #ifndef TEST_MODE
-  for (auto &led : leds) {
-    led = CRGB::Red;
-  }
-  FastLED.show();
-#endif
-
-#ifndef TEST_MODE
+  /*
   ESP_LOGI("MHZ-19", "CO2 = %d [ppm], T = %d [*C]", mhz_19.getPPM(),
            mhz_19.getTemperature());
+           */
 
   for (size_t i = 0; i < 3; ++i) {
     auto val = voltage_sensors.getChannelVoltage(i);
@@ -89,6 +81,6 @@ extern "C" void app_main(void) {
   VirtuinoJsonServer::start();
 #endif
 
-  GUI::init();
+  GUI::init(&rtc_ctrl, &mhz_19, &ds18b20);
   GUI::start();
 }
