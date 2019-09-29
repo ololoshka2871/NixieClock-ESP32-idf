@@ -39,7 +39,9 @@ extern "C" void app_main(void) {
   gpio_install_isr_service(0); // interrupt for all gpio events
   ESP_ERROR_CHECK(i2cdev_init());
 
+#if 0
   Monitor::start(5);
+#endif
 
   Nixie::configure();
 
@@ -88,4 +90,5 @@ extern "C" void app_main(void) {
 #endif
 
   GUI::init();
+  GUI::start();
 }

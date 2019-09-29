@@ -1,8 +1,14 @@
 #ifndef _DATE_DISPLAY_H_
 #define _DATE_DISPLAY_H_
 
-#include "IGUIState.h"
+#include "AbstractGUIState.h"
 
-struct DateDisplay : public IGUIState {};
+struct DateDisplay : public AbstractGUIState {
+  uint64_t idleTimeout() const override { return DEFAULT_IDLE_TIMEOUT; }
+  const char *getLOG_TAG() const override { return LOG_TAG; }
+
+private:
+  static constexpr char LOG_TAG[] = "DateDisplay";
+};
 
 #endif /* _DATE_DISPLAY_H_ */

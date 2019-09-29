@@ -29,6 +29,7 @@ idf_component_register(SRCS ${sources}
                         MHZ_19
                         VoltageSensors
                         jsl-esp32
+                        Timer
 )
 
 component_compile_options(-std=c++17)
