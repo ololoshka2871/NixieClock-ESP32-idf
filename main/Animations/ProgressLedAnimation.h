@@ -12,7 +12,11 @@ struct ProgressLedAnimation : public AbstractLedAnimation {
 protected:
   void showFrame(long frame_number, CFastLED &leds, size_t ledCount) override;
 
+  const char *getLOG_TAG() const override { return LOG_TAG; }
+
 private:
+  static constexpr char LOG_TAG[] = "ProgressLedAnimation";
+
   CRGB baseColor;
 };
 

@@ -32,7 +32,7 @@ void AbstractGUIState::enter(InterfaceButton *btn, Nixie *indicators,
       LongPushTransition->Transit(this->indicators, this->leds);
     });
   }
-  if (idleTimeout()) {
+  if (idleTimeout() != 0) {
     startIdleTimer();
 
     btn->onPush([this](InterfaceButton::eventID id, gpio_num_t pin) {

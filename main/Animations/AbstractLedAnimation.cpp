@@ -1,6 +1,8 @@
 #include <cassert>
 #include <functional>
 
+#include <esp_log.h>
+
 #include "FastLED.h"
 
 #include "AbstractLedAnimation.h"
@@ -17,21 +19,26 @@ AbstractLedAnimation::AbstractLedAnimation(CFastLED &leds, size_t ledCount,
           FRAME_TIME_US),
       cyclical{false}, framesPreLed{animation_duration / (long)ledCount} {}
 
+AbstractLedAnimation::~AbstractLedAnimation() { stop(); }
+
 AbstractLedAnimation &AbstractLedAnimation::play(bool cyclical) {
   reset();
   this->cyclical = cyclical;
   animationTimer.start(FRAME_TIME_US, true);
   animationInProgressMutex.lock();
+  ESP_LOGI(getLOG_TAG(), "Starting animation (cyclical: %d)", cyclical);
   return *this;
 }
 
 AbstractLedAnimation &AbstractLedAnimation::stop() {
+  ESP_LOGI(getLOG_TAG(), "Stopping animation");
   animationTimer.stop();
   animationInProgressMutex.unlock();
   return *this;
 }
 
 AbstractLedAnimation &AbstractLedAnimation::reset() {
+  ESP_LOGI(getLOG_TAG(), "Resetting animation");
   animationFrame = 0;
   return *this;
 }

@@ -91,6 +91,13 @@ std::chrono::seconds InterfaceButton::longPushTime() const {
   return std::chrono::duration_cast<std::chrono::seconds>(longPushPeriod);
 }
 
+void InterfaceButton::dumpCallbacks() const {
+  for (int i = 0; i < eventID::SIZE; ++i) {
+    ESP_LOGI(LOG_TAG, "callbacks[%d] = %s", i,
+             callbacks[i] ? "present" : "reseted");
+  }
+}
+
 bool InterfaceButton::getButtonState() const { return !!gpio_get_level(pin); }
 
 void InterfaceButton::CheckButton() {

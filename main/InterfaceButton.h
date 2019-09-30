@@ -40,6 +40,8 @@ struct InterfaceButton {
 
   std::chrono::seconds longPushTime() const;
 
+  void dumpCallbacks() const;
+
 private:
   static uint registredButtons;
 

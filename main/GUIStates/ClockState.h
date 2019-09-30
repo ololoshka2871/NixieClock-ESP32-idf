@@ -4,6 +4,7 @@
 #include "AbstractGUIState.h"
 
 struct RTCManager;
+struct AbstractLedAnimation;
 
 struct ClockState : public AbstractGUIState {
   ClockState(RTCManager *rtc = nullptr) : AbstractGUIState(), rtc(rtc) {}
@@ -20,8 +21,11 @@ private:
   static constexpr char LOG_TAG[] = "ClockState";
 
   RTCManager *rtc;
+  AbstractLedAnimation *LongPushAnimation;
 
   void clock_tick();
+  void startLongPushProgress(InterfaceButton::eventID id, gpio_num_t pin,
+                             InterfaceButton *btn, CFastLED *leds);
 };
 
 #endif /* _CLOCK_STATE_H_ */

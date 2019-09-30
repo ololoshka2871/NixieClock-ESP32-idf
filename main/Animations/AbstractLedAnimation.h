@@ -14,6 +14,7 @@ struct AbstractLedAnimation {
 
   AbstractLedAnimation(CFastLED &leds, size_t ledCount,
                        const std::chrono::seconds &duration);
+  virtual ~AbstractLedAnimation();
 
   virtual AbstractLedAnimation &play(bool cyclical = false);
   virtual AbstractLedAnimation &stop();
@@ -37,6 +38,7 @@ protected:
 
   virtual void showFrame(long frame_number, CFastLED &leds,
                          size_t ledCount) = 0;
+  virtual const char *getLOG_TAG() const = 0;
 
   CRGB &getLed(int n);
   CRGB &getLedRevesed(int n);
