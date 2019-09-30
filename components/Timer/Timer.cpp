@@ -11,16 +11,20 @@ esp::Timer::Timer(const timer_cb_t &cb) : cb(cb), timerHandle{}, running{IDLE} {
 }
 
 void esp::Timer::start(uint64_t timeout_us, bool periodic) {
+  if (isRunning()) {
+    stop();
+  }
+
   if (periodic) {
     running = PERIODICAL;
-    esp_timer_start_periodic(timerHandle, timeout_us);
+    ESP_ERROR_CHECK(esp_timer_start_periodic(timerHandle, timeout_us));
   } else {
     running = ONESHOT;
-    esp_timer_start_once(timerHandle, timeout_us);
+    ESP_ERROR_CHECK(esp_timer_start_once(timerHandle, timeout_us));
   }
 }
 
-void esp::Timer::stop() { esp_timer_stop(timerHandle); }
+void esp::Timer::stop() { ESP_ERROR_CHECK(esp_timer_stop(timerHandle)); }
 
 void esp::Timer::timerExpired() {
   if (running == ONESHOT) {

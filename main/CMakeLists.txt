@@ -23,6 +23,9 @@ set(sources
     GUIStates/QuickTransition.cpp
     GUIStates/ProgressTransition.cpp
 
+    Animations/AbstractLedAnimation.cpp
+    Animations/ProgressLedAnimation.cpp
+
     monitor.cpp
 )
 
