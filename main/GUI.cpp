@@ -60,8 +60,10 @@ static void setupSensors(RTCManager *rtc, CO2Sensor *CO2Sensor,
 
 void GUI::init(RTCManager *rtc, CO2Sensor *CO2Sensor,
                TemperatureSensor *TSensor) {
+  using namespace std::literals::string_literals;
+
   btn.begin();
-  btn.onPush(Logger("Pushed")).onRelease(Logger("Released"));
+  btn.onPush(Logger("Pushed"s)).onRelease(Logger("Released"s));
 
   setupSensors(rtc, CO2Sensor, TSensor);
 
@@ -87,7 +89,7 @@ void GUI::init(RTCManager *rtc, CO2Sensor *CO2Sensor,
 
   // Clock -> wifi
   clockState.LongPushTransition =
-      std::make_shared<ProgressTransition>(&wifiEnabler);
+      std::make_shared<ProgressTransition>(&wifiEnabler, btn.longPushTime());
 
   // clock -> CO2
   clockState.clickTransition = std::make_shared<QuickTransition>(&co2Monitor);
@@ -105,5 +107,5 @@ void GUI::start() { initialTransition.Transit(Nixie::instance(), &FastLED); }
 
 void GUI::setCurrentState(AbstractGUIState *newstate) {
   currentState = newstate;
-  currentState->enter(btn, Nixie::instance(), &FastLED);
+  currentState->enter(&btn, Nixie::instance(), &FastLED);
 }

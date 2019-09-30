@@ -13,6 +13,7 @@ set(sources
     TemperatureSensor.cpp
     CO2Sensor.cpp
 
+    GUIStates/AbstractGUIState.cpp
     GUIStates/InitialTransition.cpp
     GUIStates/ClockState.cpp
     GUIStates/CO2Monitor.cpp
@@ -20,6 +21,7 @@ set(sources
     GUIStates/DateDisplayer.cpp
 
     GUIStates/QuickTransition.cpp
+    GUIStates/ProgressTransition.cpp
 
     monitor.cpp
 )
@@ -50,11 +52,6 @@ target_compile_definitions(${COMPONENT_LIB}
 )
 
 target_link_libraries(${COMPONENT_LIB} PUBLIC ${LIBC})
-
-#target_compile_options(${COMPONENT_LIB}
-#    PUBLIC
-#        -lstdc++
-#)
 
 ########################################################################################################################
 

@@ -4,7 +4,7 @@
 
 #include "ClockState.h"
 
-void ClockState::enter(InterfaceButton &btn, Nixie *indicators,
+void ClockState::enter(InterfaceButton *btn, Nixie *indicators,
                        CFastLED *leds) {
   if (rtc) {
     rtc->setCallback(

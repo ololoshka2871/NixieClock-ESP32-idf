@@ -8,7 +8,7 @@ struct RTCManager;
 struct ClockState : public AbstractGUIState {
   ClockState(RTCManager *rtc = nullptr) : AbstractGUIState(), rtc(rtc) {}
 
-  void enter(InterfaceButton &btn, Nixie *indicators, CFastLED *leds) override;
+  void enter(InterfaceButton *btn, Nixie *indicators, CFastLED *leds) override;
   void leave() override;
 
   uint64_t idleTimeout() const override { return 0; }

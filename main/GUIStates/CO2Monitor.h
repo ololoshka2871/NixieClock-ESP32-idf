@@ -20,7 +20,7 @@ struct CO2Monitor : public AbstractGUIState {
 
   void setSensor(CO2Sensor *sensor);
 
-  void enter(InterfaceButton &btn, Nixie *indicators, CFastLED *leds) override;
+  void enter(InterfaceButton *btn, Nixie *indicators, CFastLED *leds) override;
 
   void leave() override;
 

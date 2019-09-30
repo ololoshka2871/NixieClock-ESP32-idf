@@ -38,7 +38,7 @@ void TemperatureMonitor::setSensor(TemperatureSensor *tsensor) {
   this->sensor = tsensor;
 }
 
-void TemperatureMonitor::enter(InterfaceButton &btn, Nixie *indicators,
+void TemperatureMonitor::enter(InterfaceButton *btn, Nixie *indicators,
                                CFastLED *leds) {
   if (sensor && presistant) {
     prevus_pdate_period = sensor->getUpdateInterval();

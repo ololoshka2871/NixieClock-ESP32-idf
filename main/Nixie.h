@@ -8,6 +8,7 @@ struct Nixie {
 
   static Nixie *instance();
 
+  void clear();
   void setValue(const std::string &v);
 
 private:

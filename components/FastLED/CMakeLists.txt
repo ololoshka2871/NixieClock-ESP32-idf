@@ -52,6 +52,8 @@ target_compile_definitions(${COMPONENT_LIB}
         -DFASTLED_RMT_BUILTIN_DRIVER=1
         -DCLOCKLESS_FREQUENCY=160000000
         -DESP32
+        -DSCALE8_C=1
+        -DFASTLED_SCALE8_FIXED=1
 )
 
 target_compile_options(${COMPONENT_LIB}

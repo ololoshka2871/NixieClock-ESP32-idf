@@ -46,7 +46,7 @@ static std::tuple<int, CRGB, CRGB> ledsToShow(int level) {
 
     CRGB fillColor{CHSV{H, (uint8_t)0xff, (uint8_t)0xff}};
     CRGB addColor{CHSV{H, (uint8_t)0xff, V}};
-    ESP_LOGD("ledsToShow()", "(%d, %s, %s)", count,
+    ESP_LOGI("ledsToShow()", "(%d, %s, %s)", count,
              print_color(fillColor).c_str(), print_color(addColor).c_str());
 
     return std::tuple<int, CRGB, CRGB>(count, fillColor, addColor);
@@ -58,7 +58,7 @@ CO2Monitor::CO2Monitor(bool presistant)
 
 void CO2Monitor::setSensor(CO2Sensor *sensor) { this->sensor = sensor; }
 
-void CO2Monitor::enter(InterfaceButton &btn, Nixie *indicators,
+void CO2Monitor::enter(InterfaceButton *btn, Nixie *indicators,
                        CFastLED *leds) {
   if (sensor && presistant) {
     prevus_pdate_period = sensor->getUpdateInterval();

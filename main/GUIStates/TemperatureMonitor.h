@@ -16,7 +16,7 @@ struct TemperatureMonitor : public AbstractGUIState {
   }
   const char *getLOG_TAG() const override { return LOG_TAG; }
 
-  void enter(InterfaceButton &btn, Nixie *indicators, CFastLED *leds) override;
+  void enter(InterfaceButton *btn, Nixie *indicators, CFastLED *leds) override;
   void leave() override;
 
   void setSensor(TemperatureSensor *tsensor);

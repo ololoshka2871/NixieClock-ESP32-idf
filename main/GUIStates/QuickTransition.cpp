@@ -4,7 +4,7 @@
 #include "QuickTransition.h"
 
 void QuickTransition::Transit(Nixie *indicators, CFastLED *leds) {
-  indicators->setValue(Nixie::clear_indicators);
+  indicators->clear();
   leds->clear(true);
 
   AbstractGUIStateTransition::Transit(indicators, leds);

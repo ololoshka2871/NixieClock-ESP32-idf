@@ -22,7 +22,7 @@ static const CRGB month2Color[] = {
     {0x77, 0x33, 0xff}  // декабрь - сине-фиолетовый
 };
 
-void DateDisplay::enter(InterfaceButton &btn, Nixie *indicators,
+void DateDisplay::enter(InterfaceButton *btn, Nixie *indicators,
                         CFastLED *leds) {
 
   AbstractGUIState::enter(btn, indicators, leds);

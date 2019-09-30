@@ -1,6 +1,7 @@
 #ifndef _INTERFACE_BUTTON_H_
 #define _INTERFACE_BUTTON_H_
 
+#include <chrono>
 #include <cstdint>
 #include <functional>
 #include <string>
@@ -14,9 +15,15 @@ struct InterfaceButton {
 
   using event_cb_t = std::function<void(eventID id, gpio_num_t pin)>;
 
-  static constexpr uint64_t button_Check_period_us = 10000;
-  static constexpr uint long_push_period =
-      3 * 1000000 / button_Check_period_us; // 3s
+  using check_period_t =
+      std::chrono::duration<uint64_t, std::ratio<10000, 1000000>>; // 10ms
+
+  static constexpr char LOG_TAG[] = "InterfaceButton";
+
+  inline static const std::chrono::microseconds buttonCheckPeriod =
+      std::chrono::duration_cast<std::chrono::microseconds>(check_period_t(1));
+  inline static const check_period_t longPushPeriod =
+      std::chrono::duration_cast<check_period_t>(std::chrono::seconds(3));
 
   InterfaceButton(gpio_num_t gpio, bool active_level = false);
   ~InterfaceButton();
@@ -31,6 +38,8 @@ struct InterfaceButton {
   InterfaceButton &onLongPush(event_cb_t &&cb);
   InterfaceButton &resetCallbacks();
 
+  std::chrono::seconds longPushTime() const;
+
 private:
   static uint registredButtons;
 
@@ -38,7 +47,7 @@ private:
   std::string eventGroupName;
   event_cb_t callbacks[SIZE];
   esp_timer_handle_t timerHandle;
-  uint active_counter;
+  check_period_t active_counter;
   bool active_level;
 
   bool getButtonState() const;

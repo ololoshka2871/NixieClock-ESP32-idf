@@ -1,3 +1,4 @@
+#include <esp_log.h>
 #include <esp_timer.h>
 
 #include "DefaultEventLoop.h"
@@ -50,7 +51,7 @@ void InterfaceButton::begin() {
 
   ESP_ERROR_CHECK(esp_timer_create(&timer_args, &timerHandle));
   ESP_ERROR_CHECK(
-      esp_timer_start_periodic(timerHandle, button_Check_period_us));
+      esp_timer_start_periodic(timerHandle, buttonCheckPeriod.count()));
 }
 
 void InterfaceButton::dispatchEvent(eventID id) {
@@ -86,30 +87,34 @@ InterfaceButton &InterfaceButton::resetCallbacks() {
   return *this;
 }
 
+std::chrono::seconds InterfaceButton::longPushTime() const {
+  return std::chrono::duration_cast<std::chrono::seconds>(longPushPeriod);
+}
+
 bool InterfaceButton::getButtonState() const { return !!gpio_get_level(pin); }
 
 void InterfaceButton::CheckButton() {
   auto newstate = getButtonState();
   auto &el = DefaultEventLoop::instance();
-  if (active_counter) {
+  if (active_counter.count()) {
     // pushed
     if (newstate != active_level) {
       // just released
       el.postEvent(eventGroupName.c_str(), Release, 1);
-      if (active_counter < long_push_period) {
+      if (active_counter < longPushPeriod) {
         el.postEvent(eventGroupName.c_str(), Click, 1);
       }
-      active_counter = 0;
+      active_counter = check_period_t{0};
     } else {
       // continue push
       ++active_counter;
-      if (active_counter == long_push_period) {
+      if (active_counter == longPushPeriod) {
         el.postEvent(eventGroupName.c_str(), LongPush, 1);
       }
     }
   } else if (newstate == active_level) {
     // just pushed
-    active_counter = 1;
+    active_counter = check_period_t{1};
     el.postEvent(eventGroupName.c_str(), Push, 1);
   }
 }

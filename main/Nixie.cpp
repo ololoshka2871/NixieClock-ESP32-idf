@@ -80,6 +80,8 @@ Nixie *Nixie::instance() {
   return inst;
 }
 
+void Nixie::clear() { setValue(clear_indicators); }
+
 void Nixie::setValue(const std::string &v) { di_controller.setText(v); }
 
 Nixie::Nixie() {
