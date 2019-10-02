@@ -13,11 +13,10 @@ void ClockState::enter(InterfaceButton *btn, Nixie *indicators,
         std::bind(&Nixie::setValue, indicators, std::placeholders::_1));
   }
 
+  AbstractGUIState::enter(btn, indicators, leds);
   btn->onPush(std::bind(&ClockState::startLongPushProgress, this,
                         std::placeholders::_1, std::placeholders::_2, btn,
                         leds));
-
-  AbstractGUIState::enter(btn, indicators, leds);
 
   btn->dumpCallbacks();
 }
@@ -27,6 +26,7 @@ void ClockState::leave() {
     rtc->setCallback(nullptr);
   }
   if (LongPushAnimation) {
+    LongPushAnimation->stop();
     delete LongPushAnimation;
   }
 

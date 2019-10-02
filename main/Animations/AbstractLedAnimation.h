@@ -34,6 +34,7 @@ private:
   void doAnimateFrame();
 
 protected:
+  static constexpr char LOG_TAG[] = "AbstractLedAnimation";
   const long framesPreLed;
 
   virtual void showFrame(long frame_number, CFastLED &leds,

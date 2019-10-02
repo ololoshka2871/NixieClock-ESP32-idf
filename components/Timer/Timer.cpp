@@ -24,7 +24,12 @@ void esp::Timer::start(uint64_t timeout_us, bool periodic) {
   }
 }
 
-void esp::Timer::stop() { ESP_ERROR_CHECK(esp_timer_stop(timerHandle)); }
+void esp::Timer::stop() {
+  if (isRunning()) {
+    running = IDLE;
+    ESP_ERROR_CHECK(esp_timer_stop(timerHandle));
+  }
+}
 
 void esp::Timer::timerExpired() {
   if (running == ONESHOT) {

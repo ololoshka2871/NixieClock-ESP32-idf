@@ -93,6 +93,8 @@ void MHZ19::writeCommand(const uint8_t cmd[], uint8_t *response) {
 
   ESP_ERROR_CHECK(uart_wait_tx_done(uart_num, 1));
 
+  flushUart();
+
   uart_write_bytes(uart_num, reinterpret_cast<const char *>(cmd), REQUEST_CNT);
   uart_write_bytes(uart_num, reinterpret_cast<const char *>(&checksumm),
                    REQUEST_CNT);
@@ -106,7 +108,7 @@ void MHZ19::writeCommand(const uint8_t cmd[], uint8_t *response) {
         ESP_LOGE(LOG_TAG, "error: can't get MH-Z19 response.");
         return;
       }
-      std::this_thread::yield();
+      // std::this_thread::yield();
       std::this_thread::sleep_for(std::chrono::milliseconds(WAIT_READ_DELAY));
     }
     uart_read_bytes(uart_num, response, MHZ19::RESPONSE_CNT, 10);
@@ -131,6 +133,12 @@ int MHZ19::getSerialData(MHZ19_UART_DATA flg) {
     co2temp = buf[4] - 40;
     co2status = buf[5];
   } else {
+    ESP_LOGE(LOG_TAG,
+             "can't parce MH-Z19 response, buf[] { %X, %X, %X, %X, %X, %X, %X, "
+             "%X, %X }",
+             buf[0], buf[1], buf[2], buf[3], buf[4], buf[5], buf[6], buf[7],
+             buf[8]);
+    flushUart();
     co2 = co2temp = co2status = -1;
   }
 
@@ -147,6 +155,8 @@ int MHZ19::getSerialData(MHZ19_UART_DATA flg) {
     break;
   }
 }
+
+void MHZ19::flushUart() { uart_flush_input(uart_num); }
 
 uint8_t MHZ19::mhz19_checksum(const uint8_t com[]) {
   uint8_t sum = 0x00;

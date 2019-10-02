@@ -89,7 +89,7 @@ void GUI::init(RTCManager *rtc, CO2Sensor *CO2Sensor,
 
   // Clock -> wifi
   clockState.LongPushTransition =
-      std::make_shared<ProgressTransition>(&wifiEnabler, btn.longPushTime());
+      std::make_shared<QuickTransition>(&wifiEnabler);
 
   // clock -> CO2
   clockState.clickTransition = std::make_shared<QuickTransition>(&co2Monitor);

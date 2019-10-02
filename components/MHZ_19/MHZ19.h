@@ -43,6 +43,7 @@ protected:
 private:
   static uint8_t mhz19_checksum(const uint8_t com[]);
   int getSerialData(MHZ19_UART_DATA flg);
+  void flushUart();
 
   static constexpr int REQUEST_CNT = 8;
   static constexpr int RESPONSE_CNT = 9;
