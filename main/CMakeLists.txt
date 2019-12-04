@@ -3,37 +3,36 @@ set(sources
     Nixie.cpp
     RTC.cpp
     String_format.cpp
-#    HttpServer.cpp
-    VirtuinoJsonServer.cpp
-    mDNSServer.cpp
-    NetAdapter.cpp
-    GUI.cpp
-    DefaultEventLoop.cpp
+
     InterfaceButton.cpp
-    TemperatureSensor.cpp
-    CO2Sensor.cpp
 
-    GUIStates/AbstractGUIState.cpp
-    GUIStates/InitialTransition.cpp
-    GUIStates/ClockState.cpp
-    GUIStates/CO2Monitor.cpp
-    GUIStates/TemperatureMonitor.cpp
-    GUIStates/DateDisplayer.cpp
+    servers/mDNSServer.cpp
+    servers/HttpServer.cpp
+    servers/VirtuinoJsonServer.cpp
 
-    GUIStates/QuickTransition.cpp
-    GUIStates/ProgressTransition.cpp
+    sensors/TemperatureSensor.cpp
+    sensors/CO2Sensor.cpp
 
-    Animations/AbstractLedAnimation.cpp
-    Animations/ProgressLedAnimation.cpp
+    GUI/GUI.cpp
 
-    monitor.cpp
+    GUI/GUIStates/AbstractGUIState.cpp
+    GUI/GUIStates/InitialTransition.cpp
+    GUI/GUIStates/ClockState.cpp
+    GUI/GUIStates/CO2Monitor.cpp
+    GUI/GUIStates/TemperatureMonitor.cpp
+    GUI/GUIStates/DateDisplayer.cpp
+
+    GUI/GUIStates/QuickTransition.cpp
+    GUI/GUIStates/ProgressTransition.cpp
+
+    GUI/Animations/AbstractLedAnimation.cpp
+    GUI/Animations/ProgressLedAnimation.cpp
 )
 
 idf_component_register(SRCS ${sources}
                     INCLUDE_DIRS "."
                     REQUIRES
                         log
-                        nvs_flash
                         mdns
                         freertos
 
@@ -45,6 +44,8 @@ idf_component_register(SRCS ${sources}
                         VoltageSensors
                         jsl-esp32
                         Timer
+                        Monitor
+                        NetAdapter
 )
 
 component_compile_options(-std=c++17)

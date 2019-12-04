@@ -2,12 +2,12 @@
 #define _INTERFACE_BUTTON_H_
 
 #include <chrono>
-#include <cstdint>
 #include <functional>
-#include <string>
+#include <memory>
 
 #include <driver/gpio.h>
-#include <esp_timer.h>
+
+namespace ctl {
 
 struct InterfaceButton {
 
@@ -45,15 +45,13 @@ struct InterfaceButton {
 private:
   static uint registredButtons;
 
-  gpio_num_t pin;
-  std::string eventGroupName;
-  event_cb_t callbacks[SIZE];
-  esp_timer_handle_t timerHandle;
-  check_period_t active_counter;
-  bool active_level;
+  struct context;
+  std::unique_ptr<context> ctx;
 
   bool getButtonState() const;
   void CheckButton();
 };
+
+} // namespace ctl
 
 #endif /*_INTERFACE_BUTTON_H_*/

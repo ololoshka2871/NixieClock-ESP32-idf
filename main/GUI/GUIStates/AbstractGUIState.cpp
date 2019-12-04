@@ -10,7 +10,7 @@ AbstractGUIState::AbstractGUIState()
     : clickTransition{}, LongPushTransition{}, IdleTransition{},
       idleTimer(std::bind(&AbstractGUIState::onIdleTimerExpired, this)) {}
 
-void AbstractGUIState::enter(InterfaceButton *btn, Nixie *indicators,
+void AbstractGUIState::enter(ctl::InterfaceButton *btn, Nixie *indicators,
                              CFastLED *leds) {
   ESP_LOGD(getLOG_TAG(), "enter()");
 
@@ -19,14 +19,14 @@ void AbstractGUIState::enter(InterfaceButton *btn, Nixie *indicators,
 
   btn->resetCallbacks();
   if (clickTransition) {
-    btn->onClick([this](InterfaceButton::eventID id, gpio_num_t pin) {
+    btn->onClick([this](ctl::InterfaceButton::eventID id, gpio_num_t pin) {
       ESP_LOGI(getLOG_TAG(), "Click");
       leave();
       clickTransition->Transit(this->indicators, this->leds);
     });
   }
   if (LongPushTransition) {
-    btn->onLongPush([this](InterfaceButton::eventID id, gpio_num_t pin) {
+    btn->onLongPush([this](ctl::InterfaceButton::eventID id, gpio_num_t pin) {
       ESP_LOGI(getLOG_TAG(), "onLongPush");
       leave();
       LongPushTransition->Transit(this->indicators, this->leds);
@@ -35,11 +35,11 @@ void AbstractGUIState::enter(InterfaceButton *btn, Nixie *indicators,
   if (idleTimeout() != 0) {
     startIdleTimer();
 
-    btn->onPush([this](InterfaceButton::eventID id, gpio_num_t pin) {
+    btn->onPush([this](ctl::InterfaceButton::eventID id, gpio_num_t pin) {
       ESP_LOGI(getLOG_TAG(), "stopIdleTimer()");
       stopIdleTimer();
     });
-    btn->onRelease([this](InterfaceButton::eventID id, gpio_num_t pin) {
+    btn->onRelease([this](ctl::InterfaceButton::eventID id, gpio_num_t pin) {
       ESP_LOGI(getLOG_TAG(), "startIdleTimer()");
       startIdleTimer();
     });

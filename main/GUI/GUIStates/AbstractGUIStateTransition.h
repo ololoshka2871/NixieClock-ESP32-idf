@@ -3,7 +3,7 @@
 
 #include <esp_log.h>
 
-#include "GUI.h"
+#include "GUI/GUI.h"
 
 struct AbstractGUIState;
 struct Nixie;

@@ -10,7 +10,10 @@
 
 class Nixie;
 class CFastLed;
+
+namespace ctl {
 class InterfaceButton;
+}
 
 struct AbstractGUIState {
 
@@ -18,7 +21,8 @@ struct AbstractGUIState {
 
   AbstractGUIState();
 
-  virtual void enter(InterfaceButton *btn, Nixie *indicators, CFastLED *leds);
+  virtual void enter(ctl::InterfaceButton *btn, Nixie *indicators,
+                     CFastLED *leds);
   virtual void leave();
 
   virtual uint64_t idleTimeout() const = 0;

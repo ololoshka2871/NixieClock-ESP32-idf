@@ -66,7 +66,7 @@ esp_err_t NetAdapter::createSoftap(const std::string &SSID,
 
   enableSoftAp();
 
-  ESP_ERROR_CHECK(DefaultEventLoop::instance().registerHandler(
+  ESP_ERROR_CHECK(esp::DefaultEventLoop::instance().registerHandler(
       WIFI_EVENT, WIFI_EVENT_AP_START, &NetAdapter::on_wifi_ap_started, this));
 
   wifi_config_t ap_config = {
@@ -111,12 +111,12 @@ esp_err_t NetAdapter::disconnect() {
     xEventGroupSetBits(_this->event_group, STA_DISCONNECTED);
   };
 
-  ESP_ERROR_CHECK(DefaultEventLoop::instance().registerHandler(
+  ESP_ERROR_CHECK(esp::DefaultEventLoop::instance().registerHandler(
       WIFI_EVENT, WIFI_EVENT_STA_DISCONNECTED, disconnect_handler, this));
   auto res =
       xEventGroupWaitBits(event_group, STA_DISCONNECTED, true, true, 1500);
   if (res & STA_DISCONNECTED) {
-    ESP_ERROR_CHECK(DefaultEventLoop::instance().unRegisterHandler(
+    ESP_ERROR_CHECK(esp::DefaultEventLoop::instance().unRegisterHandler(
         WIFI_EVENT, WIFI_EVENT_STA_DISCONNECTED, disconnect_handler));
     return ESP_OK;
   } else {
@@ -136,7 +136,7 @@ esp_err_t NetAdapter::tryConnect(const std::string &SSID,
 
   enableSTA();
 
-  ESP_ERROR_CHECK(DefaultEventLoop::instance().registerHandler(
+  ESP_ERROR_CHECK(esp::DefaultEventLoop::instance().registerHandler(
       IP_EVENT, IP_EVENT_STA_GOT_IP, &on_wifi_got_ip, this));
   wifi_config_t wifi_config{};
   std::strncpy((char *)wifi_config.sta.ssid, SSID.c_str(),
@@ -179,6 +179,6 @@ void NetAdapter::initTcpip() {
 }
 
 void NetAdapter::initEventLoop() {
-  DefaultEventLoop::instance();
+  esp::DefaultEventLoop::instance();
   event_group = xEventGroupCreate();
 }

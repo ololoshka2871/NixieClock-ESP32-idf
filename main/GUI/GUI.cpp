@@ -30,7 +30,7 @@ static WifiEnabler wifiEnabler;
 
 static InitialTransition initialTransition{&clockState};
 
-static InterfaceButton btn{GPIO_NUM_0};
+static ctl::InterfaceButton btn{GPIO_NUM_0};
 
 AbstractGUIState *GUI::currentState = nullptr;
 
@@ -39,7 +39,7 @@ struct Logger {
 
   Logger(const std::string &msg) : msg(msg) {}
 
-  void operator()(InterfaceButton::eventID id, gpio_num_t pin) {
+  void operator()(ctl::InterfaceButton::eventID id, gpio_num_t pin) {
     ESP_LOGW(LOG_TAG, "%s", msg.c_str());
   }
 

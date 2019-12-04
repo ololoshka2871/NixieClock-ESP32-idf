@@ -7,15 +7,18 @@
 
 #include "i2cdev.h"
 
-//#include "HttpServer.h"
-#include "CO2Sensor.h"
-#include "GUI.h"
+#include "GUI/GUI.h"
 #include "Nixie.h"
 #include "RTC.h"
-#include "TemperatureSensor.h"
+
 #include "VSensors.h"
-#include "VirtuinoJsonServer.h"
 #include "monitor.h"
+
+#include "sensors/CO2Sensor.h"
+#include "sensors/TemperatureSensor.h"
+
+//#include "servers/HttpServer.h"
+#include "servers/VirtuinoJsonServer.h"
 
 #include "FastLED.h"
 
@@ -40,7 +43,8 @@ extern "C" void app_main(void) {
   ESP_ERROR_CHECK(i2cdev_init());
 
 #if 1
-  auto monitor = new app::Monitor();
+  auto monitor = new esp::Monitor;
+  monitor->Start();
 #endif
 
 #ifndef TEST_MODE

@@ -3,6 +3,8 @@
 
 #include <esp_event.h>
 
+namespace esp {
+
 struct DefaultEventLoop {
   static DefaultEventLoop &instance();
 
@@ -23,5 +25,7 @@ private:
 
   DefaultEventLoop();
 };
+
+} // namespace esp
 
 #endif /*_DEFAULT_EVENT_LOOP_*/

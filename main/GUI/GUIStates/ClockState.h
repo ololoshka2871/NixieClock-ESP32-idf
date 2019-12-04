@@ -9,7 +9,8 @@ struct AbstractLedAnimation;
 struct ClockState : public AbstractGUIState {
   ClockState(RTCManager *rtc = nullptr) : AbstractGUIState(), rtc(rtc) {}
 
-  void enter(InterfaceButton *btn, Nixie *indicators, CFastLED *leds) override;
+  void enter(ctl::InterfaceButton *btn, Nixie *indicators,
+             CFastLED *leds) override;
   void leave() override;
 
   uint64_t idleTimeout() const override { return 0; }
@@ -24,8 +25,8 @@ private:
   AbstractLedAnimation *LongPushAnimation;
 
   void clock_tick();
-  void startLongPushProgress(InterfaceButton::eventID id, gpio_num_t pin,
-                             InterfaceButton *btn, CFastLED *leds);
+  void startLongPushProgress(ctl::InterfaceButton::eventID id, gpio_num_t pin,
+                             ctl::InterfaceButton *btn, CFastLED *leds);
 };
 
 #endif /* _CLOCK_STATE_H_ */

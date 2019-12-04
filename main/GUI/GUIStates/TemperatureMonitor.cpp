@@ -5,7 +5,7 @@
 
 #include "String_format.h"
 
-#include "TemperatureSensor.h"
+#include "sensors/TemperatureSensor.h"
 
 #include "FastLED.h"
 #include "Nixie.h"
@@ -38,7 +38,7 @@ void TemperatureMonitor::setSensor(TemperatureSensor *tsensor) {
   this->sensor = tsensor;
 }
 
-void TemperatureMonitor::enter(InterfaceButton *btn, Nixie *indicators,
+void TemperatureMonitor::enter(ctl::InterfaceButton *btn, Nixie *indicators,
                                CFastLED *leds) {
   if (sensor && presistant) {
     prevus_pdate_period = sensor->getUpdateInterval();

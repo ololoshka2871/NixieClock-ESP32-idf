@@ -1,5 +1,6 @@
 #include <algorithm>
 #include <chrono>
+#include <thread>
 #include <vector>
 
 #include <freertos/FreeRTOS.h>
@@ -11,7 +12,7 @@
 
 #define LOG(...) ESP_LOGI("Monitor", __VA_ARGS__)
 
-using namespace app;
+using namespace esp;
 
 static constexpr char _task_state_to_char(const eTaskState state) {
   switch (state) {
@@ -30,13 +31,11 @@ static constexpr char _task_state_to_char(const eTaskState state) {
   }
 }
 
-Monitor::Monitor() : std::thread{&Monitor::Run, this} {}
-
 void Monitor::Run() {
   using namespace std::chrono_literals;
 
   std::vector<TaskStatus_t> taskdata;
-  while (true) {
+  while (!testCancel()) {
     taskdata.resize(uxTaskGetNumberOfTasks());
     uint32_t ulTotalRunTime;
 
@@ -71,3 +70,8 @@ void Monitor::Run() {
     std::this_thread::sleep_for(1s);
   }
 }
+
+Monitor::Monitor()
+    : support::cancellableThread{"Monitor",
+                                 3500, // configMINIMAL_STACK_SIZE + 384,
+                                 tskIDLE_PRIORITY + 1} {}

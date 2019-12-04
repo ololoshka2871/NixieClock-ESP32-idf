@@ -2,7 +2,7 @@
 
 #include "Nixie.h"
 
-#include "Animations/ProgressLedAnimation.h"
+#include "GUI/Animations/ProgressLedAnimation.h"
 
 #include "ProgressTransition.h"
 

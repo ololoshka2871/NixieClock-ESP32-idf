@@ -2,11 +2,11 @@
 #include "Nixie.h"
 #include "RTC.h"
 
-#include "Animations/ProgressLedAnimation.h"
+#include "GUI/Animations/ProgressLedAnimation.h"
 
 #include "ClockState.h"
 
-void ClockState::enter(InterfaceButton *btn, Nixie *indicators,
+void ClockState::enter(ctl::InterfaceButton *btn, Nixie *indicators,
                        CFastLED *leds) {
   if (rtc) {
     rtc->setCallback(
@@ -33,8 +33,9 @@ void ClockState::leave() {
   AbstractGUIState::leave();
 }
 
-void ClockState::startLongPushProgress(InterfaceButton::eventID id,
-                                       gpio_num_t pin, InterfaceButton *btn,
+void ClockState::startLongPushProgress(ctl::InterfaceButton::eventID id,
+                                       gpio_num_t pin,
+                                       ctl::InterfaceButton *btn,
                                        CFastLED *leds) {
   (void)id;
   (void)pin;
@@ -44,7 +45,7 @@ void ClockState::startLongPushProgress(InterfaceButton::eventID id,
 
   LongPushAnimation->play();
 
-  btn->onRelease([this, btn](InterfaceButton::eventID id, gpio_num_t pin) {
+  btn->onRelease([this, btn](ctl::InterfaceButton::eventID id, gpio_num_t pin) {
     LongPushAnimation->stop();
     indicators->clear();
     btn->onRelease(nullptr);

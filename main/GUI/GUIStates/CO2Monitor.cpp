@@ -7,7 +7,7 @@
 
 #include "String_format.h"
 
-#include "CO2Sensor.h"
+#include "sensors/CO2Sensor.h"
 
 #include "FastLED.h"
 #include "Nixie.h"
@@ -58,7 +58,7 @@ CO2Monitor::CO2Monitor(bool presistant)
 
 void CO2Monitor::setSensor(CO2Sensor *sensor) { this->sensor = sensor; }
 
-void CO2Monitor::enter(InterfaceButton *btn, Nixie *indicators,
+void CO2Monitor::enter(ctl::InterfaceButton *btn, Nixie *indicators,
                        CFastLED *leds) {
   if (sensor && presistant) {
     prevus_pdate_period = sensor->getUpdateInterval();
