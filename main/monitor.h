@@ -1,15 +1,16 @@
 #ifndef MONITOR_H
 #define MONITOR_H
 
-struct Monitor {
-  Monitor() = delete;
+#include <thread>
 
-  static void start(int period_s = 1);
+namespace app {
+class Monitor : public std::thread {
+public:
+  Monitor();
 
 private:
-  static void Run(void *_);
-
-  static constexpr char _task_state_to_char(const eTaskState state);
+  void Run();
 };
+} // namespace app
 
 #endif // MONITOR_H

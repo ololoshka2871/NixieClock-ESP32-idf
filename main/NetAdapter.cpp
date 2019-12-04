@@ -1,7 +1,6 @@
 #include <cstdint>
 #include <cstring>
 
-#include <esp_eth.h>
 #include <esp_log.h>
 #include <esp_wifi.h>
 #include <nvs_flash.h>
@@ -36,7 +35,7 @@ void NetAdapter::on_wifi_got_ip(void *arg, esp_event_base_t event_base,
                                 int32_t event_id, void *event_data) {
   NetAdapter *_this = static_cast<NetAdapter *>(arg);
   ip_event_got_ip_t *event = (ip_event_got_ip_t *)event_data;
-  memcpy(&_this->sta_ip, &event->ip_info.ip, sizeof(ip4_addr_t));
+  std::memcpy(&_this->sta_ip, &event->ip_info.ip, sizeof(ip4_addr_t));
   xEventGroupSetBits(_this->event_group, STA_CONNECTED);
 }
 
