@@ -10,7 +10,7 @@
 
 #include "monitor.h"
 
-#define LOG(...) ESP_LOGI("Monitor", __VA_ARGS__)
+#define LOG(fmt, ...) printf(fmt "\n", ##__VA_ARGS__)
 
 using namespace esp;
 
@@ -51,27 +51,32 @@ void Monitor::Run() {
               });
 
     LOG("FreeRTOS threadinfo:");
+
     // Avoid divide by zero errors.
     if (ulTotalRunTime > 0) {
       std::for_each(
           taskdata.cbegin(), taskdata.cend(), [ulTotalRunTime](auto &taskinfo) {
-            auto ulStatsAsPercentage =
-                taskinfo.ulRunTimeCounter / ulTotalRunTime;
-            LOG("%20s: %c, P:%u, Sf:%6u, %2u%% (%u t)", taskinfo.pcTaskName,
-                _task_state_to_char(taskinfo.eCurrentState),
-                taskinfo.uxCurrentPriority, taskinfo.usStackHighWaterMark,
-                ulStatsAsPercentage, taskinfo.ulRunTimeCounter);
+            if (taskinfo.pcTaskName) {
+              auto ulStatsAsPercentage =
+                  taskinfo.ulRunTimeCounter / ulTotalRunTime;
+
+              LOG("%20s: %c, P:%u, Sf:%6u, %2u%% (%u t)", taskinfo.pcTaskName,
+                  _task_state_to_char(taskinfo.eCurrentState),
+                  taskinfo.uxCurrentPriority, taskinfo.usStackHighWaterMark,
+                  ulStatsAsPercentage, taskinfo.ulRunTimeCounter);
+            }
           });
     }
 
+    LOG("");
     LOG("Current Heap Free Size: %u", xPortGetFreeHeapSize());
     LOG("Minimal Heap Free Size: %u", xPortGetMinimumEverFreeHeapSize());
+    LOG("");
 
     std::this_thread::sleep_for(1s);
   }
 }
 
 Monitor::Monitor()
-    : support::cancellableThread{"Monitor",
-                                 3500, // configMINIMAL_STACK_SIZE + 384,
+    : support::cancellableThread{"Monitor", configMINIMAL_STACK_SIZE + 1100,
                                  tskIDLE_PRIORITY + 1} {}

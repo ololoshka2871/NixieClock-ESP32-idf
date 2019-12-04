@@ -9,7 +9,8 @@ using namespace support;
 
 struct cancellableThread::context {
   context(const std::string &Name, uint16_t StackDepth, UBaseType_t Priority)
-      : state{READY}, Name(Name), StackDepth(StackDepth), Priority(Priority) {}
+      : handle{nullptr}, state{READY}, Name(Name), StackDepth(StackDepth),
+        Priority(Priority) {}
 
   TaskHandle_t handle;
   std::atomic<thread_state> state;
@@ -27,7 +28,7 @@ struct cancellableThread::context {
 cancellableThread::cancellableThread(const std::string &Name,
                                      uint16_t StackDepth, UBaseType_t Priority)
     : ctx{std::make_unique<context>(Name, StackDepth, Priority)} {
-  assert(StackDepth >= configMINIMAL_STACK_SIZE);
+  assert(StackDepth >= configMINIMAL_STACK_SIZE + 1024);
 }
 
 cancellableThread::~cancellableThread() { cancel().join(); }
