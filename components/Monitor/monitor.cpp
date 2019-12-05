@@ -6,8 +6,6 @@
 #include <freertos/FreeRTOS.h>
 #include <freertos/task.h>
 
-#include <esp_log.h>
-
 #include "monitor.h"
 
 #define LOG(fmt, ...) printf(fmt "\n", ##__VA_ARGS__)

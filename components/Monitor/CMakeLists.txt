@@ -5,7 +5,6 @@ set(Monitor_src
 idf_component_register(SRCS ${Monitor_src}
                        INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}
                        REQUIRES
-                        log
                         cancellableThread
 )
 

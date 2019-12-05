@@ -45,7 +45,8 @@ idf_component_register(SRCS ${sources}
                         jsl-esp32
                         Timer
                         Monitor
-                        NetAdapter
+                        DefaultEventLoop
+                        esp32-wifi-manager
 )
 
 component_compile_options(-std=c++17)

@@ -10,7 +10,7 @@
 
 #include <json/jsl-parser.h>
 
-#include "NetAdapter.h"
+//#include "NetAdapter.h"
 #include "mDNSServer.h"
 
 #include "VirtuinoJsonServer.h"
@@ -82,12 +82,14 @@ void VirtuinoJsonServer::createMdnsRecord() {
 }
 
 void VirtuinoJsonServer::createSoftAP() {
+#if 0
   if (_ssid) {
     if (NetAdapter::instance().tryConnect(_ssid, _pass) == ESP_OK) {
       return;
     }
   }
   NetAdapter::instance().createSoftap(SSID, PASS);
+#endif
 }
 
 void VirtuinoJsonServer::Run(void *ctx) {

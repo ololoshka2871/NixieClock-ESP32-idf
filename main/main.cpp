@@ -20,6 +20,8 @@
 //#include "servers/HttpServer.h"
 #include "servers/VirtuinoJsonServer.h"
 
+#include "wifi_manager.h"
+
 #include "FastLED.h"
 
 #ifndef TEST_MODE
@@ -36,16 +38,15 @@ static VSensors voltage_sensors{
 
 static constexpr char LOG_TAG[] = "app_main";
 
-using svect_t = std::vector<std::string>;
-
 extern "C" void app_main(void) {
-  gpio_install_isr_service(0); // interrupt for all gpio events
-  ESP_ERROR_CHECK(i2cdev_init());
-
 #if 1
   auto monitor = new esp::Monitor;
   monitor->Start();
 #endif
+
+#if 0
+  gpio_install_isr_service(0); // interrupt for all gpio events
+  ESP_ERROR_CHECK(i2cdev_init());
 
 #ifndef TEST_MODE
   rtc_ctrl.loadTime().begin();
@@ -60,15 +61,10 @@ extern "C" void app_main(void) {
   esp_log_level_set("gpio", ESP_LOG_NONE);
 
 #ifndef TEST_MODE
-  FastLED.addLeds<NEOPIXEL, GPIO_NUM_15>(leds, 6);
+  FastLED.addLeds<NEOPIXEL, GPIO_NUM_15>(leds, std::size(leds));
 #endif
 
 #ifndef TEST_MODE
-  /*
-  ESP_LOGI("MHZ-19", "CO2 = %d [ppm], T = %d [*C]", mhz_19.getPPM(),
-           mhz_19.getTemperature());
-           */
-
   for (size_t i = 0; i < 3; ++i) {
     auto val = voltage_sensors.getChannelVoltage(i);
     ESP_LOGI("Voltage", "Channel %d voltage: %f V", i, val);
@@ -87,4 +83,7 @@ extern "C" void app_main(void) {
 
   GUI::init(&rtc_ctrl, &mhz_19, &ds18b20);
   GUI::start();
+#else
+  wifi_manager_start();
+#endif
 }

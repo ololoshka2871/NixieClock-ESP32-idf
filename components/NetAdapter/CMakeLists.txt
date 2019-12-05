@@ -1,5 +1,8 @@
 set(NetAdapter_src
     NetAdapter.cpp
+    Network.cpp
+    SoftAP.cpp
+    STA.cpp
 )
 
 idf_component_register(SRCS ${NetAdapter_src}
@@ -10,3 +13,5 @@ idf_component_register(SRCS ${NetAdapter_src}
                         nvs_flash
                         DefaultEventLoop
 )
+
+component_compile_options(-std=c++17)
