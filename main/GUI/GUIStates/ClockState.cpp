@@ -14,9 +14,11 @@ void ClockState::enter(ctl::InterfaceButton *btn, Nixie *indicators,
   }
 
   AbstractGUIState::enter(btn, indicators, leds);
+  /*
   btn->onPush(std::bind(&ClockState::startLongPushProgress, this,
                         std::placeholders::_1, std::placeholders::_2, btn,
                         leds));
+                        */
 
   btn->dumpCallbacks();
 }

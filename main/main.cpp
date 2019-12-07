@@ -19,10 +19,13 @@
 
 //#include "servers/HttpServer.h"
 #include "servers/VirtuinoJsonServer.h"
+#include "servers/mDNSServer.h"
 
 #include "wifi_manager.h"
 
 #include "FastLED.h"
+
+#define TEST_MODE
 
 #ifndef TEST_MODE
 static RTCManager rtc_ctrl;
@@ -39,12 +42,12 @@ static VSensors voltage_sensors{
 static constexpr char LOG_TAG[] = "app_main";
 
 extern "C" void app_main(void) {
-#if 1
+#if 0
   auto monitor = new esp::Monitor;
   monitor->Start();
 #endif
 
-#if 0
+#if 1
   gpio_install_isr_service(0); // interrupt for all gpio events
   ESP_ERROR_CHECK(i2cdev_init());
 
@@ -71,19 +74,29 @@ extern "C" void app_main(void) {
   }
 #endif
 
+#ifndef TEST_MODE
+  GUI::init(&rtc_ctrl, &mhz_19, &ds18b20);
+  GUI::start();
+#endif
+
+#endif
+
+#if 1
+  wifi_manager_start();
+
+  wifi_manager_set_callback(ORDER_LOAD_AND_RESTORE_STA, [](void *) {
+    mDNSServer::instance().addService("Wifi Manager", "_http", "_tcp", 80,
+                                      {{"path", "/"}});
+
 #if 0
   HttpServer::begin();
   HttpServer::start();
 #endif
 
-#if 0
-  VirtuinoJsonServer::begin();
-  VirtuinoJsonServer::start();
+#if 1
+    VirtuinoJsonServer::start();
 #endif
+  });
 
-  GUI::init(&rtc_ctrl, &mhz_19, &ds18b20);
-  GUI::start();
-#else
-  wifi_manager_start();
 #endif
 }

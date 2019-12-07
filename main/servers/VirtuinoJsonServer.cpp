@@ -7,29 +7,35 @@
 #include <freertos/task.h>
 
 #include <lwip/api.h>
+#include <lwip/err.h>
 
-#include <json/jsl-parser.h>
+#include "String_format.h"
+
+#include "my-jsl-parser.h"
 
 //#include "NetAdapter.h"
 #include "mDNSServer.h"
 
+#include "basic_socketbuf.hh"
+#include "basic_socketstream.hh"
+#include "servers/lwip_socket_traits.h"
+
+#include <cancellableThread.h>
+
 #include "VirtuinoJsonServer.h"
 
-static constexpr char _ssid[] = "DIR-300NRU";
-static constexpr char _pass[] = "*Bu@#?Kz,u.{-guG";
-
-static constexpr char LOG_TAG[] = "Virtuino SE JSON";
-static constexpr char SSID[] = "NIXIE-ESP32";
-static constexpr char PASS[] = "iddqdidkfa";
+static constexpr char LOG_TAG[] = "VirtuinoSE";
 
 static constexpr char api_key[] = "1234";
 
-/**********************************************************************************************************************/
+std::unique_ptr<support::cancellableThread> thread;
 
-static jsl_data_dict *parceInput(std::istream &input) {
-  jsl_parser parser(input);
-  return parser.parse();
-}
+/******************************************************************************/
+
+using socketbuf = swoope::basic_socketbuf<swoope::lwip_socket_traits>;
+using socketstream = swoope::basic_socketstream<swoope::lwip_socket_traits>;
+
+/******************************************************************************/
 
 static std::stringstream readRequest(netconn &conn) {
   netbuf *inbuf = nullptr;
@@ -60,97 +66,118 @@ static bool varify_api_key(jsl_data_dict *input) {
       return false;
     }
   } else {
-    ESP_LOGE(LOG_TAG, "invalid request, ky not found");
+    ESP_LOGE(LOG_TAG, "invalid request, key not found");
     return false;
   }
 }
 
-void VirtuinoJsonServer::begin() {
-  createSoftAP();
-  createMdnsRecord();
-}
+/******************************************************************************/
 
-void VirtuinoJsonServer::start(uint16_t port) {
-  // не через std::thread, чтобы задать размер стека
-  xTaskCreate(&VirtuinoJsonServer::Run, "VirtuinoJsonServer", 4096,
-              reinterpret_cast<void *>(port), 10, nullptr);
-}
+struct VirtuinoJsonServerThread : public support::cancellableThread {
+  VirtuinoJsonServerThread(uint16_t port)
+      : support::cancellableThread{"Virtuino", configMINIMAL_STACK_SIZE + 2048,
+                                   10},
+        port(port) {
+    reset_json_parcer();
+  }
 
-void VirtuinoJsonServer::createMdnsRecord() {
-  mDNSServer::instance().addService("Virtuino SE server", "_virtuino", "_tcp",
-                                    8191, {{"board", "esp32"}});
-}
+protected:
+  static constexpr char name[] = "Virtuino SE server";
+  static constexpr char proto[] = "_tcp";
 
-void VirtuinoJsonServer::createSoftAP() {
-#if 0
-  if (_ssid) {
-    if (NetAdapter::instance().tryConnect(_ssid, _pass) == ESP_OK) {
+  void reset_json_parcer() { jsl_data_pool::init(100, 20, 20); }
+
+  jsl_data_dict *parceInput(std::istream &input) {
+    reset_json_parcer();
+    my_jsl_parser parser(input);
+    return parser.parse_no_seek();
+  }
+
+  void Run() override {
+    mDNSServer::instance().addService(name, "_virtuino", proto, port,
+                                      {{"board", "esp32"}});
+
+    socketstream server;
+    server.open(to_string(port), 2);
+    ESP_LOGI(LOG_TAG, "Server listening on %d/tcp", port);
+
+    while (!testCancel()) {
+
+      socketstream client;
+
+      server.accept(client);
+      if (client.is_open()) {
+        process_clientConnection(client);
+        client.shutdown(std::ios_base::out);
+        client.close();
+      }
+
+      vTaskDelay(1);
+    }
+
+    server.close();
+  }
+
+  void Cleanup() override {
+    jsl_data_pool::init(0, 0, 0);
+    mDNSServer::instance().removeService(name, proto);
+    cancellableThread::Cleanup();
+  }
+
+  void send_wrong_key(socketstream &socketstream) {
+    socketstream << "{ \"status\":-1, \"message\": \"Wrong Key\"}" << std::endl;
+  }
+
+  void process_clientConnection(socketstream &socketstream) {
+    auto inputJson = parceInput(socketstream);
+    if (!inputJson) {
+      ESP_LOGE(LOG_TAG, "Failed to parce input json");
       return;
     }
-  }
-  NetAdapter::instance().createSoftap(SSID, PASS);
-#endif
-}
-
-void VirtuinoJsonServer::Run(void *ctx) {
-  const uint16_t port = reinterpret_cast<uint32_t>(ctx);
-  err_t ret;
-
-  netconn *conn;
-  netconn *newconn;
-
-  conn = netconn_new(NETCONN_TCP);
-  netconn_bind(conn, IP_ADDR_ANY, port);
-  netconn_listen(conn);
-
-  ESP_LOGI(LOG_TAG, "Server listening on port %d", port);
-
-  netconn_set_nonblocking(conn, 1);
-
-  do {
-    ret = netconn_accept(conn, &newconn);
-    if (ret == ERR_OK && newconn != nullptr) {
-      process_clientConnection(*newconn);
-      netconn_delete(newconn);
+    if (!varify_api_key(inputJson)) {
+      send_wrong_key(socketstream);
+      return;
     }
 
-    vTaskDelay(1);
-  } while (ret != ERR_MEM && ret != ERR_BUF && ret != ERR_VAL &&
-           ret != ERR_IF && ret != ERR_ARG);
+    std::string status;
+    if (inputJson->get("status", status)) {
+      if (status == "0") {
+        jsl_data_dict result;
+        jsl_data_scal status_code{2};
+        jsl_data_scal msg{"Hello Virtuino"};
+        result.set_prop("status", status_code);
+        result.set_prop("message", msg);
+        result.encode(std::cout, true);
+        result.encode(socketstream, true);
+      } else {
+        ESP_LOGE(LOG_TAG, "Unknown status: %s", status.c_str());
+        return;
+      }
+    }
 
-  netconn_close(conn);
-  netconn_delete(conn);
+    /*
+    if (status == "1") {
+      jsl_data_dict vardata;
+      auto t = &vardata;
+      if (!inputJson->get("V0_", t)) {
+        netconn_write(&clientConnection, wrong_key, sizeof(wrong_key),
+                      NETCONN_NOCOPY);
+      }
+    }*/
+  }
 
-  vTaskDelete(nullptr);
+  const uint16_t port;
+};
+
+void VirtuinoJsonServer::start(uint16_t port) {
+  if (!thread) {
+    thread = std::make_unique<VirtuinoJsonServerThread>(port);
+  }
+  thread->Restart();
 }
 
-void VirtuinoJsonServer::process_clientConnection(netconn &clientConnection) {
-  jsl_data_pool::init(100, 20, 20);
-
-  auto istream = readRequest(clientConnection);
-  auto inputJson = parceInput(istream);
-  if (!inputJson) {
-    ESP_LOGE(LOG_TAG, "Failed to parce input json:\n%s", istream.str().c_str());
-    return;
-  }
-  if (!varify_api_key(inputJson)) {
-    return;
-  }
-
-  inputJson->encode(std::cout, true);
-
-  std::string status;
-  if (!inputJson->get("status", status)) {
-    static constexpr char err[] =
-        "{ \"status\":-1, \"message\": \"Wrong Key\"}";
-    netconn_write(&clientConnection, err, sizeof(err), NETCONN_NOCOPY);
-    return;
-  }
-  if (status == "0") {
-    static constexpr char ok[] = "{ \"status\":\"2\", \"message\": \"Hello "
-                                 "Virtuino\"}";
-    netconn_write(&clientConnection, ok, sizeof(ok), NETCONN_NOCOPY);
-  }
-
-  jsl_data_pool::init(0, 0, 0);
+void VirtuinoJsonServer::stop() {
+  assert(thread);
+  thread->cancel().join();
+  thread.reset();
 }

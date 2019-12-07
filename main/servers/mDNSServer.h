@@ -13,7 +13,9 @@ struct mDNSServer {
 
   mDNSServer &addService(const char *service_name, const char *service,
                          const char *proto, uint16_t port,
-                         const std::vector<mdns_txt_item_t> &txtData);
+                         const std::vector<mdns_txt_item_t> &txtData =
+                             std::vector<mdns_txt_item_t>());
+  mDNSServer &removeService(const char *service_name, const char *proto);
 
 private:
   mDNSServer();

@@ -7,7 +7,7 @@ set(IDF_TARGET esp32)
 set(EXTRA_COMPONENT_DIRS components/esp-idf-lib/components)
 
 # Todo trimm list
-set(COMPONENTS
+#set(COMPONENTS
 #    app_trace
 #    app_update
 #    asio
@@ -16,7 +16,7 @@ set(COMPONENTS
 #    bt
 #    coap
 #    console
-     cxx
+#     cxx
 #    driver
 #    efuse
 #    esp-tls
@@ -25,7 +25,7 @@ set(COMPONENTS
 #    esp_common
 #    esp_eth
 #    esp_event
-     esp_gdbstub
+#     esp_gdbstub
 #    esp_http_client
 #    esp_http_server
 #    esp_https_ota
@@ -36,7 +36,7 @@ set(COMPONENTS
 #    esp_websocket_client
 #    esp_wifi
 #    espcoredump
-     esptool_py
+#     esptool_py
 #    expat
 #    fatfs
 #    freemodbus
@@ -74,8 +74,8 @@ set(COMPONENTS
 #    wpa_supplicant
 #    xtensa
 
-     main
-)
+#     main
+#)
 
 include($ENV{IDF_PATH}/tools/cmake/project.cmake)
 project(NixieClock-ESP32-idf)

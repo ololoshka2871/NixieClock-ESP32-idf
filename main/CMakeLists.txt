@@ -9,6 +9,7 @@ set(sources
     servers/mDNSServer.cpp
     servers/HttpServer.cpp
     servers/VirtuinoJsonServer.cpp
+    servers/my-jsl-parser.cpp
 
     sensors/TemperatureSensor.cpp
     sensors/CO2Sensor.cpp
@@ -47,6 +48,7 @@ idf_component_register(SRCS ${sources}
                         Monitor
                         DefaultEventLoop
                         esp32-wifi-manager
+                        Socketstream
 )
 
 component_compile_options(-std=c++17)

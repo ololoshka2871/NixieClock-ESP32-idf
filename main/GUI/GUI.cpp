@@ -8,10 +8,8 @@
 #include "GUIStates/ClockState.h"
 #include "GUIStates/DateDisplayer.h"
 #include "GUIStates/TemperatureMonitor.h"
-#include "GUIStates/WifiEnabler.h"
 
 #include "GUIStates/InitialTransition.h"
-#include "GUIStates/ProgressTransition.h"
 #include "GUIStates/QuickTransition.h"
 
 #include "FastLED.h"
@@ -26,7 +24,6 @@ static CO2Monitor co2Monitor, co2MonitorPresistant(true);
 static TemperatureMonitor temperatureMonitor,
     temperatureMonitorPresistant(true);
 static DateDisplay dateDisplay;
-static WifiEnabler wifiEnabler;
 
 static InitialTransition initialTransition{&clockState};
 
@@ -71,13 +68,11 @@ void GUI::init(RTCManager *rtc, CO2Sensor *CO2Sensor,
 
   // idles -> return to clock
   co2Monitor.IdleTransition = temperatureMonitor.IdleTransition =
-      dateDisplay.IdleTransition = wifiEnabler.IdleTransition =
-          quickReturnToClock;
+      dateDisplay.IdleTransition = quickReturnToClock;
 
   // click -> return to clock
-  wifiEnabler.clickTransition = dateDisplay.clickTransition =
-      co2MonitorPresistant.clickTransition =
-          temperatureMonitorPresistant.clickTransition = quickReturnToClock;
+  dateDisplay.clickTransition = co2MonitorPresistant.clickTransition =
+      temperatureMonitorPresistant.clickTransition = quickReturnToClock;
 
   // CO2 -> CO2 presistant
   co2Monitor.LongPushTransition =
@@ -86,10 +81,6 @@ void GUI::init(RTCManager *rtc, CO2Sensor *CO2Sensor,
   // Temperature -> Temperature presistant
   temperatureMonitor.LongPushTransition =
       std::make_shared<QuickTransition>(&temperatureMonitorPresistant);
-
-  // Clock -> wifi
-  clockState.LongPushTransition =
-      std::make_shared<QuickTransition>(&wifiEnabler);
 
   // clock -> CO2
   clockState.clickTransition = std::make_shared<QuickTransition>(&co2Monitor);

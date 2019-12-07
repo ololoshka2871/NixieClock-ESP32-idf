@@ -48,6 +48,8 @@ void cancellableThread::adapter(void *ctx) {
   auto _this = static_cast<cancellableThread *>(ctx);
   _this->Run();
   _this->Cleanup();
+
+  vTaskDelete(nullptr);
 }
 
 bool cancellableThread::Start() {

@@ -16,3 +16,6 @@
 [submodule "components/esp32-wifi-manager"]
 	path = components/esp32-wifi-manager
 	url = https://github.com/tonyp7/esp32-wifi-manager.git
+[submodule "components/socketstream"]
+	path = components/Socketstream/socketstream
+	url = https://github.com/Protovision/socketstream.git
