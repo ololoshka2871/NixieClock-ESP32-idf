@@ -1,3 +1,4 @@
+#include <functional>
 #include <iostream>
 #include <sstream>
 
@@ -25,8 +26,9 @@
 #include "VirtuinoJsonServer.h"
 
 static constexpr char LOG_TAG[] = "VirtuinoSE";
-
 static constexpr char api_key[] = "1234";
+
+static constexpr uint8_t V_MAX = 255;
 
 std::unique_ptr<support::cancellableThread> thread;
 
@@ -87,6 +89,20 @@ protected:
 
   void reset_json_parcer() { jsl_data_pool::init(100, 20, 20); }
 
+  struct valuesAccessors {
+    using getter_t = std::function<jsl_data *()>;
+    using setter_t = std::function<void(const jsl_data &)>;
+
+    valuesAccessors(getter_t &&getter, setter_t &&setter)
+        : getter{std::move(getter)}, setter{std::move(setter)} {}
+
+    const getter_t getter;
+    const setter_t setter;
+  };
+
+  static inline const std::vector<valuesAccessors> value_router{
+      {[]() { return new jsl_data_scal{0}; }, nullptr}};
+
   jsl_data_dict *parceInput(std::istream &input) {
     reset_json_parcer();
     my_jsl_parser parser(input);
@@ -124,8 +140,80 @@ protected:
     cancellableThread::Cleanup();
   }
 
-  void send_wrong_key(socketstream &socketstream) {
-    socketstream << "{ \"status\":-1, \"message\": \"Wrong Key\"}" << std::endl;
+  static void send_wrong_key(socketstream &socketstream) {
+    jsl_data_dict result;
+    jsl_data_scal status_code{-1};
+    jsl_data_scal msg{"Wrong Key"};
+    result.set_prop("status", status_code);
+    result.set_prop("message", msg);
+
+    result.encode(socketstream, true);
+  }
+
+  static void send_check_responce(socketstream &socketstream) {
+    jsl_data_dict result;
+    jsl_data_scal status_code{2};
+    jsl_data_scal msg{"Hello Virtuino"};
+    result.set_prop("status", status_code);
+    result.set_prop("message", msg);
+
+    result.encode(socketstream, true);
+  }
+
+  static void store_error(jsl_data_dict &dict, uint32_t val_num) {
+    dict.set_prop("message",
+                  *(new jsl_data_scal{format("No V%u, present", val_num)}));
+  }
+
+  std::unique_ptr<jsl_data_dict> reportVars(jsl_data_dict *input) {
+    using namespace std::string_literals;
+
+    auto result = std::make_unique<jsl_data_dict>();
+    auto status = new jsl_data_scal{"1"};
+
+    for (uint32_t i = 0; i <= V_MAX; ++i) {
+      auto key = format("V%d_", i);
+
+      jsl_data_dict *pdict;
+      if (input->get(key.c_str(), pdict)) {
+
+        if (i >= std::size(value_router)) {
+          store_error(*result, i);
+          *status = "-1";
+          break;
+        }
+
+        auto value = pdict->find("value");
+        if (value != pdict->end()) {
+          if (value->second->type() == jsl_data::TYPE_STR) {
+            auto v = static_cast<jsl_data_scal *>(value->second);
+            if (*v == "?"s) {
+              auto value = value_router[i].getter();
+              auto dict = new jsl_data_dict;
+              dict->set_prop("value", *value);
+              result->set_prop(key, *dict);
+            } else {
+              auto &setter = value_router[i].setter;
+              if (setter) {
+                setter(*v);
+              } else {
+                *status = "-1";
+                result->set_prop(
+                    "message",
+                    *(new jsl_data_scal{format("value V%u not writable", i)}));
+              }
+            }
+          }
+        }
+      }
+    }
+
+    result->set_prop("status", *status);
+
+    ESP_LOGI(LOG_TAG, "\n<==JSON:");
+    result->encode(std::cout);
+
+    return result;
   }
 
   void process_clientConnection(socketstream &socketstream) {
@@ -139,31 +227,20 @@ protected:
       return;
     }
 
+    ESP_LOGI(LOG_TAG, "\n==>JSON:");
+    inputJson->encode(std::cout);
+
     std::string status;
     if (inputJson->get("status", status)) {
       if (status == "0") {
-        jsl_data_dict result;
-        jsl_data_scal status_code{2};
-        jsl_data_scal msg{"Hello Virtuino"};
-        result.set_prop("status", status_code);
-        result.set_prop("message", msg);
-        result.encode(std::cout, true);
-        result.encode(socketstream, true);
+        send_check_responce(socketstream);
       } else {
         ESP_LOGE(LOG_TAG, "Unknown status: %s", status.c_str());
         return;
       }
     }
 
-    /*
-    if (status == "1") {
-      jsl_data_dict vardata;
-      auto t = &vardata;
-      if (!inputJson->get("V0_", t)) {
-        netconn_write(&clientConnection, wrong_key, sizeof(wrong_key),
-                      NETCONN_NOCOPY);
-      }
-    }*/
+    reportVars(inputJson)->encode(socketstream, true);
   }
 
   const uint16_t port;
