@@ -9,7 +9,7 @@ set(sources
     servers/mDNSServer.cpp
     servers/HttpServer.cpp
     servers/VirtuinoJsonServer.cpp
-    servers/my-jsl-parser.cpp
+    #servers/my-jsl-parser.cpp
 
     sensors/TemperatureSensor.cpp
     sensors/CO2Sensor.cpp
@@ -36,6 +36,7 @@ idf_component_register(SRCS ${sources}
                         log
                         mdns
                         freertos
+                        nlohmann_json
 
                         DynamicIndication
                         ds1307

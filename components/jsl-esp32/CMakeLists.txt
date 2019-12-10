@@ -19,8 +19,8 @@ set(jsl_esp32_http_src
         ${CMAKE_CURRENT_BINARY_DIR}/jsl-http.cpp
 	${jsl_esp32_http_base}/jsl-router.cpp
         ${jsl_esp32_http_utils}/jsl-str.cpp
-        ${jsl_esp32_json}/jsl-data.cpp
-        ${jsl_esp32_json}/jsl-parser.cpp
+#        ${jsl_esp32_json}/jsl-data.cpp
+#        ${jsl_esp32_json}/jsl-parser.cpp
 )
 
 idf_component_register(SRCS ${jsl_esp32_http_src}

@@ -19,3 +19,6 @@
 [submodule "components/socketstream"]
 	path = components/Socketstream/socketstream
 	url = https://github.com/Protovision/socketstream.git
+[submodule "components/nlohmann_json/json"]
+	path = components/nlohmann_json/json
+	url = https://github.com/nlohmann/json.git

@@ -12,7 +12,7 @@
 
 #include "String_format.h"
 
-#include "my-jsl-parser.h"
+#include "nlohmann/json.hpp"
 
 //#include "NetAdapter.h"
 #include "mDNSServer.h"
@@ -24,6 +24,8 @@
 #include <cancellableThread.h>
 
 #include "VirtuinoJsonServer.h"
+
+using json = nlohmann::json;
 
 static constexpr char LOG_TAG[] = "VirtuinoSE";
 static constexpr char api_key[] = "1234";
@@ -39,32 +41,15 @@ using socketstream = swoope::basic_socketstream<swoope::lwip_socket_traits>;
 
 /******************************************************************************/
 
-static std::stringstream readRequest(netconn &conn) {
-  netbuf *inbuf = nullptr;
-  auto ret = netconn_recv(&conn, &inbuf);
-  if (ret != ERR_OK)
-    return std::stringstream();
-
-  std::stringstream stream;
-  do {
-    char *bufptr;
-    u16_t buflen;
-    netbuf_data(inbuf, (void **)&bufptr, &buflen);
-    stream.write(bufptr, buflen);
-  } while (netbuf_next(inbuf) == 0);
-
-  netbuf_delete(inbuf);
-  return stream;
-}
-
-static bool varify_api_key(jsl_data_dict *input) {
-  std::string key;
-  if (input->get("key", key)) {
-    if (key == api_key) {
+static bool varify_api_key(json &input) {
+  auto it = input.find("key");
+  if (it != input.end()) {
+    auto value = *it->cbegin();
+    if (value.is_string() && value == api_key) {
       return true;
     } else {
-      ESP_LOGE(LOG_TAG, "Input API key invalid: %s != %s", key.c_str(),
-               api_key);
+      ESP_LOGE(LOG_TAG, "Input API key invalid: %s != %s",
+               value.get<std::string>().c_str(), api_key);
       return false;
     }
   } else {
@@ -79,19 +64,15 @@ struct VirtuinoJsonServerThread : public support::cancellableThread {
   VirtuinoJsonServerThread(uint16_t port)
       : support::cancellableThread{"Virtuino", configMINIMAL_STACK_SIZE + 2048,
                                    10},
-        port(port) {
-    reset_json_parcer();
-  }
+        port(port) {}
 
 protected:
   static constexpr char name[] = "Virtuino SE server";
   static constexpr char proto[] = "_tcp";
 
-  void reset_json_parcer() { jsl_data_pool::init(100, 20, 20); }
-
   struct valuesAccessors {
-    using getter_t = std::function<jsl_data *()>;
-    using setter_t = std::function<void(const jsl_data &)>;
+    using getter_t = std::function<json()>;
+    using setter_t = std::function<void(const json &)>;
 
     valuesAccessors(getter_t &&getter, setter_t &&setter)
         : getter{std::move(getter)}, setter{std::move(setter)} {}
@@ -101,12 +82,12 @@ protected:
   };
 
   static inline const std::vector<valuesAccessors> value_router{
-      {[]() { return new jsl_data_scal{0}; }, nullptr}};
+      {[]() { return json::number_integer_t(0); }, nullptr}};
 
-  jsl_data_dict *parceInput(std::istream &input) {
-    reset_json_parcer();
-    my_jsl_parser parser(input);
-    return parser.parse_no_seek();
+  json parceInput(std::istream &input) {
+    json result;
+    input >> result;
+    return result;
   }
 
   void Run() override {
@@ -135,72 +116,61 @@ protected:
   }
 
   void Cleanup() override {
-    jsl_data_pool::init(0, 0, 0);
     mDNSServer::instance().removeService(name, proto);
     cancellableThread::Cleanup();
   }
 
   static void send_wrong_key(socketstream &socketstream) {
-    jsl_data_dict result;
-    jsl_data_scal status_code{-1};
-    jsl_data_scal msg{"Wrong Key"};
-    result.set_prop("status", status_code);
-    result.set_prop("message", msg);
+    json result;
+    result["status"] = -1;
+    result["message"] = "Wrong Key";
 
-    result.encode(socketstream, true);
+    socketstream << result;
   }
 
   static void send_check_responce(socketstream &socketstream) {
-    jsl_data_dict result;
-    jsl_data_scal status_code{2};
-    jsl_data_scal msg{"Hello Virtuino"};
-    result.set_prop("status", status_code);
-    result.set_prop("message", msg);
+    json result;
+    result["status"] = 2;
+    result["message"] = "Hello Virtuino";
 
-    result.encode(socketstream, true);
+    socketstream << result;
   }
 
-  static void store_error(jsl_data_dict &dict, uint32_t val_num) {
-    dict.set_prop("message",
-                  *(new jsl_data_scal{format("No V%u, present", val_num)}));
+  static void store_error(json &json, uint32_t val_num) {
+    json["message"] = format("No V%u, present", val_num);
   }
 
-  std::unique_ptr<jsl_data_dict> reportVars(jsl_data_dict *input) {
+  json reportVars(json &input) {
     using namespace std::string_literals;
 
-    auto result = std::make_unique<jsl_data_dict>();
-    auto status = new jsl_data_scal{"1"};
+    json result;
+    int status = 1;
 
     for (uint32_t i = 0; i <= V_MAX; ++i) {
       auto key = format("V%d_", i);
 
-      jsl_data_dict *pdict;
-      if (input->get(key.c_str(), pdict)) {
-
+      const auto it = input.find(key);
+      if (it != input.end()) {
         if (i >= std::size(value_router)) {
-          store_error(*result, i);
-          *status = "-1";
+          store_error(result, i);
+          status = -1;
           break;
         }
 
-        auto value = pdict->find("value");
-        if (value != pdict->end()) {
-          if (value->second->type() == jsl_data::TYPE_STR) {
-            auto v = static_cast<jsl_data_scal *>(value->second);
-            if (*v == "?"s) {
-              auto value = value_router[i].getter();
-              auto dict = new jsl_data_dict;
-              dict->set_prop("value", *value);
-              result->set_prop(key, *dict);
+        const auto _itv = it->find("value");
+        if (_itv != it->end()) {
+          const auto _v = *_itv->cbegin();
+          if (_v.is_string()) {
+            if (_v.get<std::string>() == "?"s) {
+              const auto _res = value_router[i].getter();
+              result[key] = json{{"value", _res}};
             } else {
               auto &setter = value_router[i].setter;
               if (setter) {
-                setter(*v);
+                setter(_v);
               } else {
-                *status = "-1";
-                result->set_prop(
-                    "message",
-                    *(new jsl_data_scal{format("value V%u not writable", i)}));
+                status = -1;
+                result["message"] = format("value V%u not writable", i);
               }
             }
           }
@@ -208,17 +178,19 @@ protected:
       }
     }
 
-    result->set_prop("status", *status);
+    result["status"] = to_string(status);
 
     ESP_LOGI(LOG_TAG, "\n<==JSON:");
-    result->encode(std::cout);
+    std::cout << result;
 
     return result;
   }
 
   void process_clientConnection(socketstream &socketstream) {
+    using namespace std::string_literals;
+
     auto inputJson = parceInput(socketstream);
-    if (!inputJson) {
+    if (inputJson.empty()) {
       ESP_LOGE(LOG_TAG, "Failed to parce input json");
       return;
     }
@@ -228,19 +200,22 @@ protected:
     }
 
     ESP_LOGI(LOG_TAG, "\n==>JSON:");
-    inputJson->encode(std::cout);
+    std::cout << inputJson;
 
-    std::string status;
-    if (inputJson->get("status", status)) {
-      if (status == "0") {
-        send_check_responce(socketstream);
-      } else {
-        ESP_LOGE(LOG_TAG, "Unknown status: %s", status.c_str());
-        return;
+    {
+      auto status = inputJson.find("status");
+      if (status != inputJson.end() && status->cbegin()->is_string()) {
+        auto s = status->cbegin()->get<std::string>();
+        if (s == "0"s) {
+          send_check_responce(socketstream);
+        } else {
+          ESP_LOGE(LOG_TAG, "Unknown status: %s", s.c_str());
+          return;
+        }
       }
     }
 
-    reportVars(inputJson)->encode(socketstream, true);
+    socketstream << reportVars(inputJson);
   }
 
   const uint16_t port;
