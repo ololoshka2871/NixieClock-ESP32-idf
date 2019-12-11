@@ -11,9 +11,14 @@ struct TemperatureSensor;
 struct GUI {
   static constexpr char LOG_TAG[] = "GUI";
 
-  static void init(RTCManager *rtc, CO2Sensor *CO2Sensor,
-                   TemperatureSensor *TSensor);
+  static void init(CO2Sensor *CO2Sensor, TemperatureSensor *TSensor);
   static void start();
+
+  static uint8_t getClockBGColorComponenta(const uint8_t n);
+  static void setClockBGColorComponenta(const uint8_t n, uint8_t _v);
+
+  static uint32_t getClockBGColor();
+  static void setClockBGColor(uint32_t newcolor);
 
   static void setCurrentState(AbstractGUIState *newstate);
 

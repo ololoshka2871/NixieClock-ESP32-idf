@@ -5,9 +5,10 @@
 
 struct RTCManager;
 struct AbstractLedAnimation;
+struct CRGB;
 
 struct ClockState : public AbstractGUIState {
-  ClockState(RTCManager *rtc = nullptr) : AbstractGUIState(), rtc(rtc) {}
+  ClockState(RTCManager *rtc = nullptr);
 
   void enter(ctl::InterfaceButton *btn, Nixie *indicators,
              CFastLED *leds) override;
@@ -18,13 +19,18 @@ struct ClockState : public AbstractGUIState {
 
   void setRTC(RTCManager *rtc) { this->rtc = rtc; }
 
+  void setColor(const CRGB &newcolor);
+  const CRGB &getColor() const;
+
 private:
   static constexpr char LOG_TAG[] = "ClockState";
 
   RTCManager *rtc;
   AbstractLedAnimation *LongPushAnimation;
+  std::unique_ptr<CRGB> color;
 
   void clock_tick();
+  void setup_color();
   void startLongPushProgress(ctl::InterfaceButton::eventID id, gpio_num_t pin,
                              ctl::InterfaceButton *btn, CFastLED *leds);
 };

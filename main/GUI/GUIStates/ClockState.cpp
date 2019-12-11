@@ -6,6 +6,9 @@
 
 #include "ClockState.h"
 
+ClockState::ClockState(RTCManager *rtc)
+    : AbstractGUIState(), rtc(rtc), color{std::make_unique<CRGB>()} {}
+
 void ClockState::enter(ctl::InterfaceButton *btn, Nixie *indicators,
                        CFastLED *leds) {
   if (rtc) {
@@ -19,7 +22,7 @@ void ClockState::enter(ctl::InterfaceButton *btn, Nixie *indicators,
                         std::placeholders::_1, std::placeholders::_2, btn,
                         leds));
                         */
-
+  setup_color();
   btn->dumpCallbacks();
 }
 
@@ -34,6 +37,15 @@ void ClockState::leave() {
 
   AbstractGUIState::leave();
 }
+
+void ClockState::setColor(const CRGB &newcolor) {
+  *color = newcolor;
+  setup_color();
+}
+
+const CRGB &ClockState::getColor() const { return *color; }
+
+void ClockState::setup_color() { leds->showColor(*color); }
 
 void ClockState::startLongPushProgress(ctl::InterfaceButton::eventID id,
                                        gpio_num_t pin,

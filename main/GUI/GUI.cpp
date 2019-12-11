@@ -44,9 +44,8 @@ private:
   const std::string msg;
 };
 
-static void setupSensors(RTCManager *rtc, CO2Sensor *CO2Sensor,
-                         TemperatureSensor *TSensor) {
-  clockState.setRTC(rtc);
+static void setupSensors(CO2Sensor *CO2Sensor, TemperatureSensor *TSensor) {
+  clockState.setRTC(RTCManager::instance());
 
   co2Monitor.setSensor(CO2Sensor);
   co2MonitorPresistant.setSensor(CO2Sensor);
@@ -55,14 +54,13 @@ static void setupSensors(RTCManager *rtc, CO2Sensor *CO2Sensor,
   temperatureMonitorPresistant.setSensor(TSensor);
 }
 
-void GUI::init(RTCManager *rtc, CO2Sensor *CO2Sensor,
-               TemperatureSensor *TSensor) {
+void GUI::init(CO2Sensor *CO2Sensor, TemperatureSensor *TSensor) {
   using namespace std::literals::string_literals;
 
   btn.begin();
   btn.onPush(Logger("Pushed"s)).onRelease(Logger("Released"s));
 
-  setupSensors(rtc, CO2Sensor, TSensor);
+  setupSensors(CO2Sensor, TSensor);
 
   auto quickReturnToClock = std::make_shared<QuickTransition>(&clockState);
 
@@ -95,6 +93,23 @@ void GUI::init(RTCManager *rtc, CO2Sensor *CO2Sensor,
 }
 
 void GUI::start() { initialTransition.Transit(Nixie::instance(), &FastLED); }
+
+uint8_t GUI::getClockBGColorComponenta(const uint8_t n) {
+  return clockState.getColor().raw[n];
+}
+
+void GUI::setClockBGColorComponenta(const uint8_t n, uint8_t _v) {
+  auto color = clockState.getColor();
+  color.raw[n] = _v;
+  clockState.setColor(color);
+}
+
+uint32_t GUI::getClockBGColor() { return clockState.getColor(); }
+
+void GUI::setClockBGColor(uint32_t newcolor) {
+  clockState.setColor(newcolor);
+  ESP_LOGI(LOG_TAG, "New clock color: %X", newcolor);
+}
 
 void GUI::setCurrentState(AbstractGUIState *newstate) {
   currentState = newstate;

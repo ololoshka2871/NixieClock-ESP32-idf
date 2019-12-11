@@ -25,10 +25,9 @@
 
 #include "FastLED.h"
 
-#define TEST_MODE
+//#define TEST_MODE
 
 #ifndef TEST_MODE
-static RTCManager rtc_ctrl;
 static TemperatureSensor ds18b20{GPIO_NUM_4, std::chrono::minutes(1)};
 static CRGB leds[6];
 static CO2Sensor mhz_19{UART_NUM_2, GPIO_NUM_16, GPIO_NUM_17};
@@ -52,7 +51,7 @@ extern "C" void app_main(void) {
   ESP_ERROR_CHECK(i2cdev_init());
 
 #ifndef TEST_MODE
-  rtc_ctrl.loadTime().begin();
+  RTCManager::instance()->loadTime().begin();
 #endif
 
 #ifndef TEST_MODE
@@ -75,7 +74,7 @@ extern "C" void app_main(void) {
 #endif
 
 #ifndef TEST_MODE
-  GUI::init(&rtc_ctrl, &mhz_19, &ds18b20);
+  GUI::init(&mhz_19, &ds18b20);
   GUI::start();
 #endif
 

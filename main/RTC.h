@@ -21,10 +21,12 @@ struct RTCManager {
   static void fix_tm(tm &_tm) { _tm.tm_year -= tm_fix_value; }
   static void unfix_tm(tm &_tm) { _tm.tm_year += tm_fix_value; }
 
-  RTCManager(uint8_t rtc_addr = DS1307_ADDR);
+  static RTCManager *instance(uint8_t rtc_addr = DS1307_ADDR);
+
   ~RTCManager();
   RTCManager &loadTime();
-  RTCManager &setupRTC(const std::time_t &dest_time = 0);
+  RTCManager &setupRTC(const std::time_t &newtime = 0);
+  RTCManager &setupRTC(const timeval &newtime);
   RTCManager &begin();
   RTCManager &setCallback(const onTimeUpdated &onTimeUpdated);
   RTCManager &enable(bool enable = true);
@@ -33,6 +35,8 @@ public:
   void enable_1s_interrupt();
 
 private:
+  RTCManager(uint8_t rtc_addr);
+
   SemaphoreHandle_t rtc_sem;
   std::thread *update_thread;
   std::atomic<bool> exitflag;

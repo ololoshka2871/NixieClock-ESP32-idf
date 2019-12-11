@@ -4,6 +4,7 @@
 #include <esp_log.h>
 
 #include "Controller.h"
+#include "CryticalSection.h"
 #include "String_format.h"
 
 #include "RTC.h"
@@ -13,6 +14,8 @@ static constexpr gpio_num_t SDA_PIN = GPIO_NUM_21;
 static constexpr gpio_num_t SCL_PIN = GPIO_NUM_22;
 
 static constexpr uint32_t Sync_Clock_EVERY_s = 60;
+
+static RTCManager *inst = nullptr;
 
 static constexpr tm build_time{
     CLOCK_START_SEC,     CLOCK_START_MIN,
@@ -93,6 +96,13 @@ RTCManager::RTCManager(uint8_t rtc_addr)
   ds1307_dev.addr = rtc_addr;
 }
 
+RTCManager *RTCManager::instance(uint8_t rtc_addr) {
+  if (!inst) {
+    inst = new RTCManager(rtc_addr);
+  }
+  return inst;
+}
+
 RTCManager::~RTCManager() {
   exitflag = true;
   update_thread->join();
@@ -104,21 +114,27 @@ RTCManager &RTCManager::loadTime() {
   return *this;
 }
 
-RTCManager &RTCManager::setupRTC(const std::time_t &dest_time) {
+RTCManager &RTCManager::setupRTC(const std::time_t &newtime) {
   std::tm tm;
-  if (dest_time == 0) {
+  if (newtime == 0) {
     std::time_t result{std::time(nullptr)};
     tm = std::tm{*std::gmtime(&result)};
   } else {
-    tm = std::tm{*std::gmtime(&dest_time)};
+    tm = std::tm{*std::gmtime(&newtime)};
   }
   unfix_tm(tm);
 
+  timeval arg{newtime, 0};
+  settimeofday(&arg, nullptr);
   if (ds1307_set_time(&ds1307_dev, &tm) != ESP_OK) {
     ESP_LOGE(LOG_TAG, "Failed to set RTC!");
   }
 
   return *this;
+}
+
+RTCManager &RTCManager::setupRTC(const timeval &newtime) {
+  return setupRTC(newtime.tv_sec);
 }
 
 void RTCManager::enable_1s_interrupt() {
