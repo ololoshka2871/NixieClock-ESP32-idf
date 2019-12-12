@@ -3,6 +3,8 @@ set(sources
     Nixie.cpp
     RTC.cpp
     String_format.cpp
+    CPPNVS.cpp
+    FreeRTOSTimer.cpp
 
     InterfaceButton.cpp
 

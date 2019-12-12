@@ -11,6 +11,8 @@ struct TemperatureSensor;
 struct GUI {
   static constexpr char LOG_TAG[] = "GUI";
 
+  static constexpr char clock_color[] = "clock_color";
+
   static void init(CO2Sensor *CO2Sensor, TemperatureSensor *TSensor);
   static void start();
 
@@ -24,6 +26,8 @@ struct GUI {
 
 private:
   static AbstractGUIState *currentState;
+
+  static void setClockBGColor_no_save(uint32_t newcolor);
 };
 
 #endif /* _GUI_H_ */

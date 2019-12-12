@@ -45,7 +45,13 @@ void ClockState::setColor(const CRGB &newcolor) {
 
 const CRGB &ClockState::getColor() const { return *color; }
 
-void ClockState::setup_color() { leds->showColor(*color); }
+void ClockState::setup_color() {
+  if (leds) {
+    leds->showColor(*color);
+  } else {
+    ESP_LOGI(LOG_TAG, "Color setup skipped");
+  }
+}
 
 void ClockState::startLongPushProgress(ctl::InterfaceButton::eventID id,
                                        gpio_num_t pin,

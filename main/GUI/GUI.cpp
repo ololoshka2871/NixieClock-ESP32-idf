@@ -2,6 +2,9 @@
 
 #include <esp_log.h>
 
+#include "CPPNVS.h"
+#include "FreeRTOSTimer.h"
+
 #include "InterfaceButton.h"
 
 #include "GUIStates/CO2Monitor.h"
@@ -28,6 +31,13 @@ static DateDisplay dateDisplay;
 static InitialTransition initialTransition{&clockState};
 
 static ctl::InterfaceButton btn{GPIO_NUM_0};
+
+static FreeRTOSTimer commitSettingsTimer{
+    "CommitSettings", pdMS_TO_TICKS(5000), false, nullptr, [](FreeRTOSTimer *) {
+      NVS nvs{GUI::LOG_TAG};
+
+      nvs.set(GUI::clock_color, GUI::getClockBGColor());
+    }};
 
 AbstractGUIState *GUI::currentState = nullptr;
 
@@ -92,7 +102,15 @@ void GUI::init(CO2Sensor *CO2Sensor, TemperatureSensor *TSensor) {
       std::make_shared<QuickTransition>(&dateDisplay);
 }
 
-void GUI::start() { initialTransition.Transit(Nixie::instance(), &FastLED); }
+void GUI::start() {
+  NVS nvs{LOG_TAG, NVS_READONLY};
+  uint32_t color = 0;
+
+  nvs.get(clock_color, color);
+  setClockBGColor_no_save(color);
+
+  initialTransition.Transit(Nixie::instance(), &FastLED);
+}
 
 uint8_t GUI::getClockBGColorComponenta(const uint8_t n) {
   return clockState.getColor().raw[n];
@@ -104,11 +122,25 @@ void GUI::setClockBGColorComponenta(const uint8_t n, uint8_t _v) {
   clockState.setColor(color);
 }
 
-uint32_t GUI::getClockBGColor() { return clockState.getColor(); }
+uint32_t GUI::getClockBGColor() {
+  auto &color = clockState.getColor();
+  uint32_t res =
+      (uint32_t)color.r << 16 | (uint32_t)color.g << 8 | (uint32_t)color.b;
 
-void GUI::setClockBGColor(uint32_t newcolor) {
+  return res;
+}
+
+void GUI::setClockBGColor_no_save(uint32_t newcolor) {
   clockState.setColor(newcolor);
   ESP_LOGI(LOG_TAG, "New clock color: %X", newcolor);
+}
+
+void GUI::setClockBGColor(uint32_t newcolor) {
+  setClockBGColor_no_save(newcolor);
+
+  commitSettingsTimer.stop();
+  commitSettingsTimer.reset();
+  commitSettingsTimer.start();
 }
 
 void GUI::setCurrentState(AbstractGUIState *newstate) {
