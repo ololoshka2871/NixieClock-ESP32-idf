@@ -10,6 +10,8 @@
 
 #include "ds1307.h"
 
+#define FIX_YEAR 0
+
 struct RTCManager {
   using onTimeUpdated = std::function<void(std::string)>;
 
@@ -18,8 +20,16 @@ struct RTCManager {
   // int tm_year;			/* Year	- 1900.  */
   static constexpr int tm_fix_value = 1900;
 
-  static void fix_tm(tm &_tm) { _tm.tm_year -= tm_fix_value; }
-  static void unfix_tm(tm &_tm) { _tm.tm_year += tm_fix_value; }
+  static void fix_tm(tm &_tm) {
+#if FIX_YEAR
+    _tm.tm_year -= tm_fix_value;
+#endif
+  }
+  static void unfix_tm(tm &_tm) {
+#if FIX_YEAR
+    _tm.tm_year += tm_fix_value;
+#endif
+  }
 
   static RTCManager *instance(uint8_t rtc_addr = DS1307_ADDR);
 

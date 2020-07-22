@@ -26,6 +26,8 @@ struct CO2Sensor {
 
   void setUpdateCallback(const callback_t &cb);
 
+  void startCalibration(int method);
+
 private:
   std::chrono::seconds update_interval;
   MHZ19 sensor;

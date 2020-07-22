@@ -52,3 +52,16 @@ void CO2Sensor::thread_func(CO2Sensor *self) {
     }
   }
 }
+
+void CO2Sensor::startCalibration(int method) {
+  if (method != 1) {
+    ESP_LOGE(LOG_TAG, "Incorrect method of callibration (%d), [1]", method);
+    return;
+  }
+
+  static const char *methods[] = {"clear atmosphere"};
+
+  ESP_LOGI(LOG_TAG, "Starting %s CO2 sensor calibration", methods[method - 1]);
+
+  sensor.calibrateZero();
+}

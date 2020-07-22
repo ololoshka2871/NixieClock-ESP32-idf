@@ -11,7 +11,7 @@ set(sources
     servers/mDNSServer.cpp
     servers/HttpServer.cpp
     servers/VirtuinoJsonServer.cpp
-    #servers/my-jsl-parser.cpp
+    servers/VirtuinoJsonServer.value_router.cpp
 
     sensors/TemperatureSensor.cpp
     sensors/CO2Sensor.cpp

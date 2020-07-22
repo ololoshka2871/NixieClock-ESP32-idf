@@ -49,6 +49,9 @@ void RTCManager::load_clock() {
   }
   fix_tm(time);
 
+  ESP_LOGI(LOG_TAG, "RTC = %d.%d.%d %d:%d:%d", time.tm_mday, time.tm_mon,
+           time.tm_year, time.tm_hour, time.tm_min, time.tm_sec);
+
   time_t ds1307_time = std::mktime(&time);
   time_t _build_time = std::mktime(&build_time_copy);
   if (ds1307_time < _build_time) {

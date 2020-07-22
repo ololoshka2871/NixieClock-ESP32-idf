@@ -1,36 +1,23 @@
-#include <chrono>
-#include <functional>
 #include <iostream>
-#include <sstream>
-
-#include <RTC.h>
 
 #include <esp_log.h>
 
 #include <freertos/FreeRTOS.h>
 #include <freertos/task.h>
 
-#include <lwip/api.h>
-#include <lwip/err.h>
+#include <cancellableThread.h>
 
-#include "String_format.h"
+#include "VirtuinoJsonServer.value_router.h"
 
-#include "nlohmann/json.hpp"
-
-//#include "NetAdapter.h"
 #include "mDNSServer.h"
 
 #include "basic_socketbuf.hh"
 #include "basic_socketstream.hh"
 #include "servers/lwip_socket_traits.h"
 
-#include <cancellableThread.h>
-
-#include "GUI/GUI.h"
+#include "String_format.h"
 
 #include "VirtuinoJsonServer.h"
-
-using json = nlohmann::json;
 
 static constexpr char LOG_TAG[] = "VirtuinoSE";
 static constexpr char api_key[] = "1234";
@@ -65,30 +52,6 @@ static bool varify_api_key(json &input) {
 
 /******************************************************************************/
 
-enum class colorComponenta : uint8_t { RED = 0, GREEN = 1, BLUE = 2 };
-
-template <colorComponenta componenta> json getClorComponenta() {
-  return json::string_t{to_string(
-      GUI::getClockBGColorComponenta(static_cast<uint8_t>(componenta)))};
-}
-
-template <colorComponenta componenta>
-void setClorComponenta(const json &value) {
-  if (value.is_string()) {
-    uint32_t c;
-    auto s = value.get<std::string>();
-    auto r = sscanf(s.c_str(), "%u", &c);
-    if (r == 1) {
-      GUI::setClockBGColorComponenta(static_cast<uint8_t>(componenta),
-                                     static_cast<uint8_t>(c));
-    } else {
-      ESP_LOGE(LOG_TAG, "Failed to parce color componenta: %s", s.c_str());
-    }
-  }
-}
-
-/******************************************************************************/
-
 struct VirtuinoJsonServerThread : public support::cancellableThread {
   VirtuinoJsonServerThread(uint16_t port)
       : support::cancellableThread{"Virtuino", configMINIMAL_STACK_SIZE + 4096,
@@ -98,80 +61,6 @@ struct VirtuinoJsonServerThread : public support::cancellableThread {
 protected:
   static constexpr char name[] = "Virtuino SE server";
   static constexpr char proto[] = "_tcp";
-
-  struct valuesAccessors {
-    using getter_t = std::function<json()>;
-    using setter_t = std::function<void(const json &)>;
-
-    valuesAccessors(getter_t &&getter, setter_t &&setter)
-        : getter{std::move(getter)}, setter{std::move(setter)} {}
-
-    const getter_t getter;
-    const setter_t setter;
-  };
-
-  static inline const std::vector<valuesAccessors> value_router {
-    // V0 - clock
-    {[]() {
-       int64_t miliseconds =
-           std::chrono::duration_cast<std::chrono::milliseconds>(
-               std::chrono::system_clock::now().time_since_epoch())
-               .count();
-       return json::string_t{to_string(miliseconds)};
-     },
-     [](const json &newval) {
-       if (newval.is_string()) {
-         uint64_t t_ms;
-         auto s = newval.get<std::string>();
-         auto r = sscanf(s.c_str(), "%lld", &t_ms);
-         if (r == 1) {
-           timeval tv{static_cast<time_t>(t_ms / 1000),
-                      static_cast<__suseconds_t>((t_ms % 1000) * 1000)};
-           RTCManager::instance()->setupRTC(tv);
-         } else {
-           ESP_LOGE(LOG_TAG, "parsing %s, res = %d", s.c_str(), r);
-         }
-       }
-     }},
-        // vo color
-        {[]() {
-           union {
-             int32_t _signed;
-             uint32_t _unsigned;
-           } v;
-           v._unsigned = GUI::getClockBGColor();
-           v._unsigned = v._unsigned | (0xFF << 24);
-           return json::string_t{to_string(v._signed)};
-         },
-         [](const json &value) {
-           if (value.is_string()) {
-             union {
-               int32_t _signed;
-               uint32_t _unsigned;
-             } v;
-             auto s = value.get<std::string>();
-             auto r = sscanf(s.c_str(), "%d", &v._signed);
-             if (r == 1) {
-               // see https://stackoverflow.com/a/38570206
-               v._unsigned = v._unsigned & ((1 << 24) - 1);
-               GUI::setClockBGColor(v._unsigned);
-             } else {
-               ESP_LOGE(LOG_TAG, "failed to get int from %s", s.c_str());
-             }
-           }
-         }},
-#if 0
-      // V1 - R
-      {getClorComponenta<colorComponenta::RED>,
-       setClorComponenta<colorComponenta::RED>},
-      // V2 - G
-      {getClorComponenta<colorComponenta::GREEN>,
-       setClorComponenta<colorComponenta::GREEN>},
-      // V3 - B
-      {getClorComponenta<colorComponenta::BLUE>,
-       setClorComponenta<colorComponenta::BLUE>},
-#endif
-  };
 
   json parceInput(std::istream &input) {
     json result;
@@ -268,10 +157,6 @@ protected:
     }
 
     result["status"] = to_string(status);
-#if 0
-    ESP_LOGI(LOG_TAG, "\n<==JSON:");
-    std::cout << result << std::endl;
-#endif
     return result;
   }
 
@@ -304,7 +189,11 @@ protected:
       }
     }
 
-    socketstream << reportVars(inputJson) << std::endl;
+    {
+      auto res = reportVars(inputJson);
+      socketstream << res << std::endl;
+      std::cout << res << std::endl;
+    }
   }
 
   const uint16_t port;

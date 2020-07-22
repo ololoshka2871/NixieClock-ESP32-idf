@@ -12,9 +12,6 @@
 #include <nvs_flash.h>
 #include <stdlib.h>
 
-#undef LOG_LOCAL_LEVEL
-#define LOG_LOCAL_LEVEL ESP_LOG_VERBOSE
-
 static const char LOG_TAG[] = "CPPNVS";
 
 /**

@@ -19,6 +19,8 @@
 
 //#include "servers/HttpServer.h"
 #include "servers/VirtuinoJsonServer.h"
+#include "servers/VirtuinoJsonServer.value_router.h"
+
 #include "servers/mDNSServer.h"
 
 #include "wifi_manager.h"
@@ -93,6 +95,10 @@ extern "C" void app_main(void) {
 #endif
 
 #if 1
+    VirtuinoSensorsHolder::co2Sensor = &mhz_19;
+    VirtuinoSensorsHolder::temperatureSensor = &ds18b20;
+    VirtuinoSensorsHolder::vsensors = &voltage_sensors;
+
     VirtuinoJsonServer::start();
 #endif
   });
